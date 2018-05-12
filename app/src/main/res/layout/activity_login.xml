@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@mipmap/img_select_device"
+    android:orientation="vertical">
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center"
+        android:textColor="@color/colorWhite"
+        android:textSize="20sp"
+        android:text="登录"/>
+    <ImageView
+        android:id="@+id/imv_head"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_gravity="center"
+        android:src="@mipmap/img_login_logo"/>
+
+    <com.mb.smartfridge.views.ClearableEditText
+        android:id="@+id/et_tel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:drawableLeft="@mipmap/ic_login_user"
+        android:textColorHint="@color/colorHint"
+        android:textColor="@color/colorWhite"
+        android:background="@null"
+        android:drawablePadding="10dp"
+        android:hint="@string/input_phone"
+        android:textSize="@dimen/activity_text_size"
+        android:inputType="number"
+        tools:ignore="TextFields" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:background="@color/colorGray"  />
+
+    <com.mb.smartfridge.views.ClearableEditText
+        android:id="@+id/et_pwd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="30dp"
+        android:drawableLeft="@mipmap/ic_login_password"
+        android:textColorHint="@color/colorHint"
+        android:textColor="@color/colorWhite"
+        android:background="@null"
+        android:drawablePadding="10dp"
+        android:hint="@string/input_pwd"
+        android:textSize="@dimen/activity_text_size"
+        android:inputType="textPassword"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:background="@color/colorGray"  />
+
+    <TextView
+        android:id="@+id/tv_login"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:background="@mipmap/bind_parent"
+        android:textSize="@dimen/activity_text_size"
+        android:text="@string/login"
+        android:textColor="@color/colorWhite"
+        android:gravity="center"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_margin="20dp">
+
+        <TextView
+            android:id="@+id/tv_forget_pwd"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:gravity="start|center"
+            android:textColor="@color/colorHint"
+            android:textSize="@dimen/activity_text_size_small"
+            android:text="@string/forget_pwd"/>
+
+        <TextView
+            android:id="@+id/tv_register"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="end|center"
+            android:layout_height="match_parent"
+            android:textColor="@color/colorBlue"
+            android:textSize="@dimen/activity_text_size_small"
+            android:text="@string/register"/>
+    </LinearLayout>
+</LinearLayout>
