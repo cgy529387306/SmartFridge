@@ -8,10 +8,10 @@ import android.widget.EditText;
 
 import com.mb.smartfridge.R;
 import com.mb.smartfridge.api.ApiMethods;
-import com.mb.smartfridge.base.BaseActivity;
 import com.mb.smartfridge.entity.UserData;
 import com.mb.smartfridge.http.subscribers.ProgressSubscriber;
 import com.mb.smartfridge.http.subscribers.SubscriberOnNextListener;
+import com.mb.smartfridge.utils.NavigationHelper;
 import com.mb.smartfridge.utils.ProjectHelper;
 
 public class LoginActivity extends BaseActivity implements View.OnClickListener {
@@ -23,8 +23,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);//设置全屏
-        setContentView(R.layout.activity_login,"登录");
-        hideActionbar();
+        setContentView(R.string.login,R.layout.activity_login);
         initView();
         initNext();
     }
@@ -53,10 +52,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.tv_register:
-//                NavigationHelper.startActivity(LoginActivity.this,RegisterActivity.class,null,false);
+                NavigationHelper.startActivity(LoginActivity.this,RegisterActivity.class,null,false);
                 break;
             case R.id.tv_forget_pwd:
-//                NavigationHelper.startActivity(LoginActivity.this,ForgetPwdActivity.class,null,false);
+                NavigationHelper.startActivity(LoginActivity.this,ForgetPwdActivity.class,null,false);
                 break;
             case R.id.tv_login:
                 doLogin();
@@ -82,7 +81,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             showToast(getString(R.string.password_error));
             return;
         }
-        ApiMethods.getInstance().doLogin(new ProgressSubscriber(loginOnNext, context), mobile, password);
+        ApiMethods.getInstance().doLogin(new ProgressSubscriber(loginOnNext, LoginActivity.this), mobile, password);
     }
 
 }

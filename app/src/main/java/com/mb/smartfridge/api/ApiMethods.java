@@ -105,4 +105,19 @@ public class ApiMethods extends HttpMethods{
                 .map(new HttpResultFunc<UserData>());
         toSubscribe(observable, subscriber);
     }
+    public void doRegister(Subscriber<UserData> subscriber, String mobile, String password, String code){
+        Observable observable = movieService.doRegister(mobile, password,code)
+                .map(new HttpResultFunc<UserData>());
+        toSubscribe(observable, subscriber);
+    }
+    public void sendSms(Subscriber<Object> subscriber, String mobile, String action){
+        Observable observable = movieService.sendSms(mobile, action)
+                .map(new HttpResultFunc<Object>());
+        toSubscribe(observable, subscriber);
+    }
+    public void getpw(Subscriber<Object> subscriber, String mobile, String password, String code){
+        Observable observable = movieService.getpw(mobile, password,code)
+                .map(new HttpResultFunc<Object>());
+        toSubscribe(observable, subscriber);
+    }
 }

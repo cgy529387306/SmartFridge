@@ -26,5 +26,6 @@
     <color name="colorHint">#ffaeaeae</color>
     <color name="colorTextGray">#ff999999</color>
     <color name="colorBackground">#fff7f7f8</color>
-
+    <!-- 页面背景颜色 -->
+    <color name="background_color">#f7f7f7</color>
 </resources>

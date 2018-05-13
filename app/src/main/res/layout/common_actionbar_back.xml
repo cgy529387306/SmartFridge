@@ -1,59 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/rl_root"
+    android:id="@+id/rly_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/transparent"
+    android:background="@color/white"
     android:fitsSystemWindows="true"
     android:clipToPadding="false">
-<RelativeLayout
-    android:id="@+id/rl_actionbar"
-    android:layout_width="match_parent"
-    android:layout_height="48dp"
-    android:background="@android:color/transparent">
 
-    <ImageView
-        android:id="@+id/iv_back"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:padding="12dp"
-        android:src="@mipmap/ic_actionbar_back" />
-    <TextView
-        android:id="@+id/tv_title"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_centerInParent="true"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:text="标题"
-        android:gravity="center"
-        android:singleLine="true"
-        android:textColor="@color/white"
-        android:textSize="20sp" />
-    <TextView
-        android:id="@+id/tv_action"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_alignParentRight="true"
-        android:gravity="center"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:singleLine="true"
-        android:text="设置"
-        android:textColor="@color/white"
-        android:textSize="16sp"
-        android:visibility="gone" />
+    <LinearLayout
+        android:id="@+id/ll_basetitle"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="10dp">
 
-    <ImageView
-        android:id="@+id/iv_action"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_alignParentRight="true"
-        android:visibility="gone"
-        android:gravity="center"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:src="@mipmap/ic_menu" />
-</RelativeLayout>
+        <LinearLayout
+            android:id="@+id/lin_actionbar_back"
+            android:layout_width="0dp"
+            android:layout_weight="3"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/img_head"
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                 />
+            <TextView
+                android:id="@+id/tv_name"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="10dp"
+                android:textColor="@color/black"
+                android:textSize="15dp"
+                android:gravity="center"
+                android:visibility="gone"
+                android:text="名字"/>
+
+        </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_weight="8"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/txv_actionbar_title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:singleLine="true"
+            android:text=""
+            android:textColor="@color/black"
+            android:textSize="20sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_weight="3"
+        android:layout_gravity="right"
+        android:layout_height="match_parent">
+
+        <View
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"/>
+
+        <TextView
+            android:id="@+id/tv_show"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textColor="@color/black"
+            android:textSize="13dp"
+            android:visibility="gone"
+            android:paddingRight="10dp"
+            android:text=""/>
+
+        <ImageView
+            android:id="@+id/imv_actionbar_action"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:visibility="gone"
+            android:gravity="right"
+            android:paddingRight="10dp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
 </RelativeLayout>
