@@ -5,6 +5,7 @@ import android.os.CountDownTimer;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mb.smartfridge.R;
@@ -29,8 +30,22 @@ public class ForgetPwdActivity extends BaseActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView( R.layout.activity_forget_pwd);
+        setTitle("忘记密码");
         initView();
         initNext();
+    }
+
+    private void setTitle(String title) {
+        TextView tvTitle = findViewById(R.id.tv_title);
+        tvTitle.setText(title);
+        ImageView imgLeft = findViewById(R.id.btn_left);
+        imgLeft.setVisibility(View.VISIBLE);
+        imgLeft.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBack();
+            }
+        });
     }
     private void initView() {
         etTel = (EditText) findViewById(R.id.et_tel);

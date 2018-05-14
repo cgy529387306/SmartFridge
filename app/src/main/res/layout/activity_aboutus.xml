@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorGray"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/img_about"/>
+
+        <include layout="@layout/base_layout"/>
+    </RelativeLayout>
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/about"
+            android:layout_margin="20dp"
+            android:lineSpacingExtra="5dp"
+            android:textScaleX="1.1"
+            android:textColor="@color/colorBlack"
+            android:textSize="@dimen/activity_text_size_small" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorWhite"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:drawableTop="@mipmap/ic_tmall"
+                android:text="@string/tmall"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_height="wrap_content" />
+
+            <View
+                android:layout_width="0.1dp"
+                android:background="@color/colorGray"
+                android:layout_height="match_parent"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:drawableTop="@mipmap/ic_jd"
+                android:text="@string/jd"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+</LinearLayout>

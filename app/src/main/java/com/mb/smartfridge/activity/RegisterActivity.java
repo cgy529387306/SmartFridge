@@ -5,6 +5,7 @@ import android.os.CountDownTimer;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mb.smartfridge.R;
@@ -29,8 +30,21 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+        setTitle("注册");
         initView();
         initNext();
+    }
+    private void setTitle(String title) {
+        TextView tvTitle = findViewById(R.id.tv_title);
+        tvTitle.setText(title);
+        ImageView imgLeft = findViewById(R.id.btn_left);
+        imgLeft.setVisibility(View.VISIBLE);
+        imgLeft.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBack();
+            }
+        });
     }
 
     private void initView() {

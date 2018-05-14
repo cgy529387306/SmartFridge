@@ -19,7 +19,7 @@
             android:layout_marginStart="16dp"
             android:layout_toEndOf="@+id/tv_main_title"
             android:padding="10dp"
-            android:src="@mipmap/ic_menu"
+            android:src="@mipmap/ic_about"
             android:layout_marginLeft="16dp"
             android:layout_toRightOf="@+id/tv_main_title" />
 

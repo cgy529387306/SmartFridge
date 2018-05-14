@@ -6,6 +6,8 @@
     android:background="@mipmap/img_select_device"
     android:orientation="vertical">
 
+    <include layout="@layout/base_layout"/>
+
     <ImageView
         android:id="@+id/imv_head"
         android:layout_width="wrap_content"

@@ -6,6 +6,8 @@
     android:background="@mipmap/img_select_device"
     android:orientation="vertical">
 
+    <include layout="@layout/base_layout"/>
+
     <com.mb.smartfridge.views.ClearableEditText
         android:id="@+id/et_tel"
         android:layout_width="match_parent"

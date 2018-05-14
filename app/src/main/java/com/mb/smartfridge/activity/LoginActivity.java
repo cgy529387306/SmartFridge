@@ -3,8 +3,9 @@ package com.mb.smartfridge.activity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.mb.smartfridge.R;
 import com.mb.smartfridge.api.ApiMethods;
@@ -21,16 +22,21 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);//设置全屏
-        setContentView(R.string.login,R.layout.activity_login);
+        setContentView(R.layout.activity_login);
+        setTitle("登录");
         initView();
         initNext();
+    }
+
+    private void setTitle(String title) {
+        TextView tvTitle = findViewById(R.id.tv_title);
+        tvTitle.setText(title);
     }
 
     private void initView() {
         etTel = (EditText) findViewById(R.id.et_tel);
         etPwd = (EditText) findViewById(R.id.et_pwd);
+
         findViewById(R.id.tv_register).setOnClickListener(this);
         findViewById(R.id.tv_forget_pwd).setOnClickListener(this);
         findViewById(R.id.tv_login).setOnClickListener(this);
@@ -41,7 +47,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             @Override
             public void onNext(UserData subjects) {
                 if (subjects!=null){
-                    showToast(subjects.toString());
+//                    showToast(subjects.toString());
                 }
             }
         };
@@ -58,7 +64,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 NavigationHelper.startActivity(LoginActivity.this,ForgetPwdActivity.class,null,false);
                 break;
             case R.id.tv_login:
-                doLogin();
+                NavigationHelper.startActivity(LoginActivity.this,MainActivity.class,null,true);
+//                doLogin();
                 break;
             default:
                 break;
@@ -69,16 +76,16 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         String mobile = etTel.getText().toString().trim();
         String password = etPwd.getText().toString().trim();
         if (TextUtils.isEmpty(mobile)) {
-            showToast(getString(R.string.input_correct_tel));
+//            showToast(getString(R.string.input_correct_tel));
             return;
         }else if (TextUtils.isEmpty(password)){
-            showToast(getString(R.string.input_password));
+//            showToast(getString(R.string.input_password));
             return;
         }else if (!ProjectHelper.isMobiPhoneNum(mobile)) {
-            showToast(getString(R.string.tel_error));
+//            showToast(getString(R.string.tel_error));
             return;
         }else if (!ProjectHelper.isPwdValid(password)) {
-            showToast(getString(R.string.password_error));
+//            showToast(getString(R.string.password_error));
             return;
         }
         ApiMethods.getInstance().doLogin(new ProgressSubscriber(loginOnNext, LoginActivity.this), mobile, password);

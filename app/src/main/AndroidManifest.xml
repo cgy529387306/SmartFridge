@@ -20,7 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".activity.MainActivity"
+            android:name=".activity.LoginActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.NoActionBar" >
             <intent-filter>
@@ -28,8 +28,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".activity.MainActivity"/>
         <activity android:name=".activity.RegisterActivity"/>
         <activity android:name=".activity.ForgetPwdActivity"/>
+        <activity android:name=".activity.AboutUsActivity"/>
+
     </application>
 
 </manifest>

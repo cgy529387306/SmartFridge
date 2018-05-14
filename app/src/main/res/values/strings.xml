@@ -17,4 +17,10 @@
     <string name="input_valid_code">请输入验证码</string>
     <string name="tel_error">手机号码错误</string>
     <string name="password_error">密码格式错误</string>
+    <string name="about">TAWA 初创于德国，品牌囊括旅行(Travel) 、陪伴(Accompany) 、智慧(Wisdom) 、娱乐(Amusement)四重理念，旨在连接家庭、汽车，生活。
+        \n\n在为您提供德系高品质车品的同时，TAWA还为您和家人带来与自驾游相关的吃、住、行、玩所需装备一站式解决方案。\n \n快乐自驾，TAWA相伴。
+    </string>
+    <string name="tmall">TAWA\n天猫旗舰店</string>
+    <string name="jd">TAWA\n京东旗舰店</string>
+    <string name="aboutus">关于我们</string>
 </resources>
