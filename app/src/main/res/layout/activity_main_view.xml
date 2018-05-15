@@ -1,78 +1,201 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorWhite"
+    android:background="@color/colorGray"
     android:orientation="vertical">
 
-    <RelativeLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="44dp"
-        android:layout_marginTop="22dp"
-        android:background="@color/colorWhite">
+        android:layout_height="wrap_content">
 
         <ImageView
-            android:id="@+id/im_setting"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="16dp"
-            android:layout_toEndOf="@+id/tv_main_title"
-            android:padding="10dp"
-            android:src="@mipmap/ic_about"
-            android:layout_marginLeft="16dp"
-            android:layout_toRightOf="@+id/tv_main_title" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scaleType="centerCrop"
+            android:src="@mipmap/img_select_device"/>
 
+        <include layout="@layout/base_layout"/>
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/lly_nodevice"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorWhite"
+            android:padding="10dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tv_search"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="搜索可用设备"
+                android:textColor="@color/colorBlack"
+                android:textSize="@dimen/activity_text_size_small"/>
+
+            <ImageView
+                android:id="@+id/iv_search"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/yl_drawable_loading_dialog"
+                android:layout_marginLeft="5dp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorWhite"
+            android:padding="20dp"
+            android:visibility="gone"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@mipmap/ic_warning"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_marginLeft="10dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="找不到可用设备"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="@dimen/activity_text_size"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="请确保您的冰箱已开机，并已将手机靠近冰箱!"
+                    android:textColor="@color/colorHint"
+                    android:textSize="@dimen/activity_text_size_low"/>
+            </LinearLayout>
+        </LinearLayout>
+
+
+        <ListView
+            android:id="@+id/lv_device"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:paddingLeft="10dp"
+            android:visibility="gone"
+            android:paddingRight="10dp"
+            android:divider="@color/colorHint"
+            android:dividerHeight="0.1dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <LinearLayout
+            android:id="@+id/lly_cancelback"
+            android:layout_width="match_parent"
+            android:layout_marginBottom="10dp"
+            android:visibility="visible"
+            android:layout_height="40dp">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text="取消返回"
+                android:gravity="center"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/shape_cancelback_btn"
+                android:textColor="@color/colorBlack"
+                android:textSize="@dimen/activity_text_size"/>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text="重新搜索"
+                android:layout_marginLeft="50dp"
+                android:layout_marginRight="10dp"
+                android:gravity="center"
+                android:background="@drawable/shape_research_btn"
+                android:textColor="@color/colorWhite"
+                android:textSize="@dimen/activity_text_size"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/lly_adddevice"
+            android:layout_width="match_parent"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/shape_research_btn"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:visibility="gone"
+            android:layout_height="40dp">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@mipmap/ic_menu"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="添加设备"
+                android:layout_marginLeft="10dp"
+                android:gravity="center"
+                android:textColor="@color/colorWhite"
+                android:textSize="@dimen/activity_text_size"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/lly_openbluetooth"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
         <TextView
-            android:id="@+id/tv_main_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:visibility="gone"
+            android:text="搜索可用设备"
             android:textColor="@color/colorBlack"
-            android:text="标题"
+            android:padding="10dp"
             android:textSize="@dimen/activity_text_size"/>
 
         <ImageView
-            android:id="@+id/im_control"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:visibility="gone"
-            android:layout_alignParentRight="true"
-            android:src="@mipmap/ic_arrow_right"
-            android:padding="5dp"
-            android:layout_centerVertical="true"/>
-    </RelativeLayout>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:src="@mipmap/ic_bluetooth"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="请确保已打开手机蓝牙和冰箱!"
+            android:textColor="@color/colorHint"
+            android:layout_marginTop="40dp"
+            android:textSize="@dimen/activity_text_size_small"/>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_bind_machine"
-        android:layout_width="match_parent"
-        android:layout_height="240dp"
-        android:layout_centerInParent="true"
-        android:overScrollMode="never"/>
+        <TextView
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="开启蓝牙"
+            android:gravity="center"
+            android:padding="10dp"
+            android:layout_marginTop="40dp"
+            android:background="@drawable/shape_cancelback_btn"
+            android:textColor="@color/colorBlack"
+            android:textSize="@dimen/activity_text_size"/>
+    </LinearLayout>
 
-    <TextView
-        android:id="@+id/tv_add_machine_hint"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/rv_bind_machine"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="5dp"
-        android:padding="10dp"
-        android:textColor="@color/colorHintGray"
-        android:gravity="center"
-        android:textSize="16sp"
-        android:visibility="gone"/>
-
-    <TextView
-        android:id="@+id/tv_add_machine_date"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/tv_add_machine_hint"
-        android:layout_centerHorizontal="true"
-        android:textColor="@color/colorHintGray"
-        android:gravity="center"
-        android:textSize="13sp"
-        android:visibility="gone"/>
-
-</RelativeLayout>
+</LinearLayout>
