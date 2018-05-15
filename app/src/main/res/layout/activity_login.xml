@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@mipmap/img_select_device"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <include layout="@layout/base_layout"/>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:scaleType="centerCrop"
+        android:src="@mipmap/img_select_device" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <include layout="@layout/base_layout"/>
     <ImageView
         android:id="@+id/imv_head"
         android:layout_width="wrap_content"
@@ -103,4 +111,5 @@
             android:textSize="@dimen/activity_text_size_small"
             android:text="@string/register"/>
     </LinearLayout>
-</LinearLayout>
+    </LinearLayout>
+</FrameLayout>

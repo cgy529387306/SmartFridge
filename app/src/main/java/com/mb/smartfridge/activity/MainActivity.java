@@ -8,6 +8,7 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.mb.smartfridge.R;
 import com.mb.smartfridge.adapter.DrawerLayoutAdapter;
@@ -19,7 +20,6 @@ import java.util.List;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener {
     private ListView lvDrawerlayout;
-    private ImageView setting;
     private DrawerLayout drawerLayout;
     private RelativeLayout leftMenu;
     private DrawerLayoutAdapter drawerlayoutAdapter;
@@ -31,17 +31,32 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setTitle("选择设备");
         initDrawerLayout();
         initView();
     }
+    private void setTitle(String title) {
+        TextView tvTitle = findViewById(R.id.tv_title);
+        tvTitle.setText(title);
+        ImageView imgLeft = findViewById(R.id.btn_left);
+        imgLeft.setVisibility(View.VISIBLE);
+        imgLeft.setImageResource(R.mipmap.ic_menu);
+        imgLeft.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (drawerLayout.isDrawerOpen(leftMenu)) {
+                    drawerLayout.closeDrawer(leftMenu);
+                } else {
+                    drawerLayout.openDrawer(leftMenu);
+                }
+            }
+        });
+    }
 
     private void initView() {
-        drawerLayout = (DrawerLayout) findViewById(R.id.dl_content_main_menu);
-        leftMenu = (RelativeLayout) findViewById(R.id.ll_left_menu);
-        setting = (ImageView) findViewById(R.id.im_setting);
+        drawerLayout = findViewById(R.id.dl_content_main_menu);
+        leftMenu = findViewById(R.id.ll_left_menu);
         lvDrawerlayout = findViewById(R.id.lv_drawerlayout);
-        setting.setOnClickListener(this);
-        findViewById(R.id.im_control).setOnClickListener(this);
         drawerlayoutAdapter = new DrawerLayoutAdapter(MainActivity.this,list);
         lvDrawerlayout.setAdapter(drawerlayoutAdapter);
         lvDrawerlayout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -70,13 +85,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.im_setting:
-                if (drawerLayout.isDrawerOpen(leftMenu)) {
-                    drawerLayout.closeDrawer(leftMenu);
-                } else {
-                    drawerLayout.openDrawer(leftMenu);
-                }
-                break;
+//            case R.id.im_setting:
+//
+//                break;
             default:
                 break;
         }

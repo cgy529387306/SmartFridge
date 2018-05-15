@@ -1,78 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorWhite"
+    android:background="@color/colorGray"
     android:orientation="vertical">
 
-    <RelativeLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="44dp"
-        android:layout_marginTop="22dp"
-        android:background="@color/colorWhite">
+        android:layout_height="wrap_content">
 
         <ImageView
-            android:id="@+id/im_setting"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="16dp"
-            android:layout_toEndOf="@+id/tv_main_title"
-            android:padding="10dp"
-            android:src="@mipmap/ic_about"
-            android:layout_marginLeft="16dp"
-            android:layout_toRightOf="@+id/tv_main_title" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scaleType="centerCrop"
+            android:src="@mipmap/img_select_device"/>
+
+        <include layout="@layout/base_layout"/>
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/lly_nodevice"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <TextView
-            android:id="@+id/tv_main_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:visibility="gone"
+            android:text="搜索可用设备"
             android:textColor="@color/colorBlack"
-            android:text="标题"
-            android:textSize="@dimen/activity_text_size"/>
+            android:padding="10dp"
+            android:textSize="@dimen/activity_text_size_small"/>
 
-        <ImageView
-            android:id="@+id/im_control"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:visibility="gone"
-            android:layout_alignParentRight="true"
-            android:src="@mipmap/ic_arrow_right"
-            android:padding="5dp"
-            android:layout_centerVertical="true"/>
-    </RelativeLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorWhite"
+            android:padding="20dp"
+            android:orientation="horizontal">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_bind_machine"
-        android:layout_width="match_parent"
-        android:layout_height="240dp"
-        android:layout_centerInParent="true"
-        android:overScrollMode="never"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@mipmap/ic_warning"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_marginLeft="10dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="找不到可用设备"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="@dimen/activity_text_size"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="请确保您的冰箱已开机，并已将手机靠近冰箱!"
+                    android:textColor="@color/colorHint"
+                    android:textSize="@dimen/activity_text_size_low"/>
+            </LinearLayout>
+        </LinearLayout>
 
-    <TextView
-        android:id="@+id/tv_add_machine_hint"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/rv_bind_machine"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="5dp"
-        android:padding="10dp"
-        android:textColor="@color/colorHintGray"
-        android:gravity="center"
-        android:textSize="16sp"
-        android:visibility="gone"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="取消返回"
+                android:background="@drawable/shape_cancelback_btn"
+                android:textColor="@color/colorBlack"
+                android:textSize="@dimen/activity_text_size"/>
+        </LinearLayout>
 
-    <TextView
-        android:id="@+id/tv_add_machine_date"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/tv_add_machine_hint"
-        android:layout_centerHorizontal="true"
-        android:textColor="@color/colorHintGray"
-        android:gravity="center"
-        android:textSize="13sp"
-        android:visibility="gone"/>
+    </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>
