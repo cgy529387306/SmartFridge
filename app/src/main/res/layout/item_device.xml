@@ -40,9 +40,18 @@
             android:textSize="@dimen/activity_text_size_small" />
     </LinearLayout>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:text="未连接"
+        android:gravity="center"
+        android:textColor="@color/colorHint"
+        android:textSize="@dimen/activity_text_size_small" />
+
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:layout_marginLeft="10dp"
         android:src="@mipmap/ic_arrow_right"/>
 
 
