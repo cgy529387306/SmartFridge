@@ -2,8 +2,8 @@ package com.mb.smartfridge.activity;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.AnimationDrawable;
-import android.media.Image;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
@@ -24,12 +24,9 @@ import com.mb.smartfridge.adapter.DrawerLayoutAdapter;
 import com.mb.smartfridge.entity.DeviceEntity;
 import com.mb.smartfridge.entity.DrawerlayoutEntity;
 import com.mb.smartfridge.utils.NavigationHelper;
-import com.mb.smartfridge.utils.ToastHelper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener {
     private ListView lvDrawerlayout;
@@ -38,21 +35,19 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private RelativeLayout leftMenu;
     private DrawerLayoutAdapter drawerlayoutAdapter;
     private DeviceAdapter mDeviceAdapter;
+
+    private LinearLayout llyDevice; //蓝牙设备列表
+    private LinearLayout llyOpenBluetooth; // 开启蓝牙界面
     private ImageView ivSearch;
     private TextView tvSearch;
-    private LinearLayout llyCancelback;  // 底部  取消返回 重新搜索
-    private TextView llyAdddevice; //底部  添加设备
-    private LinearLayout llyOpenbluetooth; // 开启蓝牙界面
-    private TextView tvOpenbluetooth;
-    private LinearLayout llyNodevice; //  设备界面
-    private TextView tvReSearch; // 重新搜索
-    private TextView tvCancelBack; //取消返回
+    private LinearLayout llyCancelBack;  // 底部  取消返回 重新搜索
+    private TextView tvAddDevice; //底部  添加设备
+    private LinearLayout llyNoDevice; //  设备界面
     private List<DrawerlayoutEntity> list = new ArrayList<>();
     private int img[] = new int[]{R.mipmap.ic_about,R.mipmap.ic_store,R.mipmap.ic_edit_password,R.mipmap.ic_logout};
     private String[] text = new String[]{"关于我们","线上商城","修改密码","退出登录"};
     private List<DeviceEntity> mDeviceEntityList = new ArrayList<>();
     private BluetoothAdapter bluetoothAdapter;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,19 +77,21 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     private void initView() {
-        ivSearch = (ImageView) findViewById(R.id.iv_search);
+        if(!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+            Toast.makeText(this,"不支持BLE", Toast.LENGTH_SHORT).show();
+        }
+        ivSearch = findViewById(R.id.iv_search);
         tvSearch = findViewById(R.id.tv_search);
         drawerLayout = findViewById(R.id.dl_content_main_menu);
         leftMenu = findViewById(R.id.ll_left_menu);
         lvDrawerlayout = findViewById(R.id.lv_drawerlayout);
-        lvDevice =findViewById(R.id.lv_device);
-        llyCancelback =findViewById(R.id.lly_cancelback);
-        llyAdddevice =findViewById(R.id.lly_adddevice);
-        llyOpenbluetooth = findViewById(R.id.lly_openbluetooth);
-        tvOpenbluetooth = findViewById(R.id.tv_openbluetooth);
-        llyNodevice = findViewById(R.id.lly_nodevice);
-        tvReSearch = findViewById(R.id.tv_reSearch);
-        tvCancelBack = findViewById(R.id.tv_cancelBack);
+
+        llyDevice = findViewById(R.id.lly_device);
+        lvDevice = findViewById(R.id.lv_device);
+        llyCancelBack =findViewById(R.id.lly_cancelBack);
+        tvAddDevice =findViewById(R.id.tv_addDevice);
+        llyOpenBluetooth = findViewById(R.id.lly_openBluetooth);
+        llyNoDevice = findViewById(R.id.lly_noDevice);
         drawerlayoutAdapter = new DrawerLayoutAdapter(MainActivity.this,list);
         lvDrawerlayout.setAdapter(drawerlayoutAdapter);
         mDeviceAdapter = new DeviceAdapter(MainActivity.this,mDeviceEntityList);
@@ -120,30 +117,29 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 }
             }
         });
-        tvOpenbluetooth.setOnClickListener(this);
-        llyAdddevice.setOnClickListener(this);
-        tvReSearch.setOnClickListener(this);
-        tvCancelBack.setOnClickListener(this);
+        tvAddDevice.setOnClickListener(this);
+        findViewById(R.id.tv_openBluetooth).setOnClickListener(this);
+        findViewById(R.id.tv_reSearch).setOnClickListener(this);
+        findViewById(R.id.tv_cancelBack).setOnClickListener(this);
 
     }
 
-    private void initCheckBluetooth() {
-
+    private void checkBluetooth() {
          bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter.isEnabled()){
-            ToastHelper.showToast("蓝牙打开了"+ bluetoothAdapter.isEnabled());
-            llyOpenbluetooth.setVisibility(View.GONE);
+            llyDevice.setVisibility(View.VISIBLE);
+            llyOpenBluetooth.setVisibility(View.GONE);
             checkDevice();
         }else {
-            ToastHelper.showToast("蓝牙未打开"+ bluetoothAdapter.isEnabled());
-            llyOpenbluetooth.setVisibility(View.VISIBLE);
+            llyOpenBluetooth.setVisibility(View.VISIBLE);
+            llyDevice.setVisibility(View.GONE);
         }
     }
 
     private void searchDevice(){
         ivSearch.setVisibility(View.VISIBLE);
         tvSearch.setText("搜索可用设备");
-        llyCancelback.setVisibility(View.GONE);
+        llyCancelBack.setVisibility(View.GONE);
         AnimationDrawable anim = (AnimationDrawable) ivSearch.getBackground();
         anim.start();
         Handler handler = new Handler();
@@ -153,7 +149,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             public void run() {
                 ivSearch.setVisibility(View.GONE);
                 tvSearch.setText("我的设备");
-                llyAdddevice.setVisibility(View.VISIBLE);
+                tvAddDevice.setVisibility(View.VISIBLE);
             }
         };
         handler.postDelayed(runnable,2000);
@@ -162,8 +158,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private void addDevice(){
         ivSearch.setVisibility(View.VISIBLE);
         tvSearch.setText("搜索可用设备");
-        llyCancelback.setVisibility(View.VISIBLE);
-        llyAdddevice.setVisibility(View.GONE);
+        llyCancelBack.setVisibility(View.VISIBLE);
+        tvAddDevice.setVisibility(View.GONE);
         AnimationDrawable anim = (AnimationDrawable) ivSearch.getBackground();
         anim.start();
         Handler handler = new Handler();
@@ -178,13 +174,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         handler.postDelayed(runnable,2000);
     }
 
+    private void cancelSearch(){
+        ivSearch.setVisibility(View.GONE);
+        tvSearch.setText("我的设备");
+        llyCancelBack.setVisibility(View.GONE);
+        tvAddDevice.setVisibility(View.VISIBLE);
+    }
+
     private void checkDevice() {
-        llyNodevice.setVisibility(View.VISIBLE);
+        llyNoDevice.setVisibility(View.VISIBLE);
         // 此时应该有网络请求 得到设备信息  之后再做判断
         if (mDeviceEntityList.size() > 0){
             ivSearch.setVisibility(View.GONE);
             tvSearch.setText("我的设备");
-            llyAdddevice.setVisibility(View.VISIBLE);
+            llyCancelBack.setVisibility(View.VISIBLE);
 
         }else { //没有设备就自动搜索
             searchDevice();
@@ -198,22 +201,24 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
     private void initDeviceList(){
         for (int i = 0;i < 3;i++) {
-//            mDeviceEntityList.add(new DeviceEntity("智能车载冰箱","G3JJ4KK5I8-6FR5"));
         }
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.tv_openbluetooth:  // 打开蓝牙
+            case R.id.tv_openBluetooth:  // 打开蓝牙
                 Intent intent =  new Intent(Settings.ACTION_BLUETOOTH_SETTINGS);
                 startActivity(intent);
                 break;
-            case R.id.lly_adddevice:  //  添加设备
+            case R.id.tv_addDevice:  //  添加设备
                 addDevice();
                 break;
             case R.id.tv_reSearch:  //  重新搜索
                 addDevice();
+                break;
+            case R.id.tv_cancelBack:  //  取消返回
+                cancelSearch();
                 break;
             default:
                 break;
@@ -223,8 +228,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @Override
     protected void onResume() {
         super.onResume();
-        initCheckBluetooth();//检测蓝牙是否开启
-
+        checkBluetooth();//检测蓝牙是否开启
     }
 
     @Override

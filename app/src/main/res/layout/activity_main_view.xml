@@ -8,184 +8,180 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scaleType="centerCrop"
             android:src="@mipmap/img_select_device"/>
-
         <include layout="@layout/base_layout"/>
-
     </FrameLayout>
 
-    <LinearLayout
-        android:id="@+id/lly_nodevice"
+
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone"
-        android:orientation="vertical">
-
+        android:layout_height="match_parent">
         <LinearLayout
+            android:id="@+id/lly_device"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:padding="10dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/tv_search"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="搜索可用设备"
-                android:textColor="@color/colorBlack"
-                android:textSize="@dimen/activity_text_size_small"/>
-
-            <ImageView
-                android:id="@+id/iv_search"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/yl_drawable_loading_dialog"
-                android:layout_marginLeft="5dp"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/colorWhite"
-            android:padding="20dp"
+            android:layout_height="match_parent"
             android:visibility="gone"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@mipmap/ic_warning"/>
+            android:orientation="vertical">
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_marginLeft="10dp"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:layout_height="50dp"
+                android:padding="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
                 <TextView
+                    android:id="@+id/tv_search"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="找不到可用设备"
+                    android:text="搜索可用设备"
                     android:textColor="@color/colorBlack"
-                    android:textSize="@dimen/activity_text_size"/>
-                <TextView
+                    android:textSize="@dimen/activity_text_size_small"/>
+                <ImageView
+                    android:id="@+id/iv_search"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="请确保您的冰箱已开机，并已将手机靠近冰箱!"
-                    android:textColor="@color/colorHint"
-                    android:textSize="@dimen/activity_text_size_low"/>
+                    android:background="@drawable/yl_drawable_loading_dialog"
+                    android:layout_marginLeft="5dp"/>
             </LinearLayout>
+           <FrameLayout
+               android:layout_width="match_parent"
+               android:layout_height="0dp"
+               android:layout_weight="1">
+               <LinearLayout
+                   android:id="@+id/lly_noDevice"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"
+                   android:background="@color/colorWhite"
+                   android:padding="20dp"
+                   android:visibility="gone"
+                   android:orientation="horizontal">
+                   <ImageView
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:src="@mipmap/ic_warning"/>
+                   <LinearLayout
+                       android:layout_width="match_parent"
+                       android:layout_marginLeft="10dp"
+                       android:layout_height="match_parent"
+                       android:orientation="vertical">
+                       <TextView
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content"
+                           android:text="找不到可用设备"
+                           android:textColor="@color/colorBlack"
+                           android:textSize="@dimen/activity_text_size"/>
+                       <TextView
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content"
+                           android:text="请确保您的冰箱已开机，并已将手机靠近冰箱!"
+                           android:textColor="@color/colorHint"
+                           android:textSize="@dimen/activity_text_size_low"/>
+                   </LinearLayout>
+               </LinearLayout>
+               <ListView
+                   android:id="@+id/lv_device"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"
+                   android:background="@color/white"
+                   android:paddingLeft="10dp"
+                   android:visibility="visible"
+                   android:paddingRight="10dp"
+                   android:divider="@color/colorHint"
+                   android:dividerHeight="0.1dp"/>
+           </FrameLayout>
+          <FrameLayout
+              android:layout_width="match_parent"
+              android:layout_height="60dp">
+              <LinearLayout
+                  android:id="@+id/lly_cancelBack"
+                  android:layout_width="match_parent"
+                  android:layout_gravity="center_vertical"
+                  android:layout_height="40dp">
+                  <TextView
+                      android:id="@+id/tv_cancelBack"
+                      android:layout_width="0dp"
+                      android:layout_weight="1"
+                      android:layout_height="match_parent"
+                      android:text="取消返回"
+                      android:gravity="center"
+                      android:layout_marginLeft="10dp"
+                      android:background="@drawable/shape_cancelback_btn"
+                      android:textColor="@color/colorBlack"
+                      android:textSize="@dimen/activity_text_size"/>
+                  <TextView
+                      android:id="@+id/tv_reSearch"
+                      android:layout_width="0dp"
+                      android:layout_weight="1"
+                      android:layout_height="match_parent"
+                      android:text="重新搜索"
+                      android:layout_marginLeft="50dp"
+                      android:layout_marginRight="10dp"
+                      android:gravity="center"
+                      android:background="@drawable/shape_research_btn"
+                      android:textColor="@color/colorWhite"
+                      android:textSize="@dimen/activity_text_size"/>
+              </LinearLayout>
+              <TextView
+                  android:id="@+id/tv_addDevice"
+                  android:layout_width="match_parent"
+                  android:layout_height="40dp"
+                  android:layout_gravity="center_vertical"
+                  android:visibility="gone"
+                  android:text="+ 添加设备"
+                  android:layout_marginLeft="10dp"
+                  android:layout_marginRight="10dp"
+                  android:gravity="center"
+                  android:background="@drawable/shape_research_btn"
+                  android:textColor="@color/colorWhite"
+                  android:textSize="@dimen/activity_text_size"/>
+          </FrameLayout>
         </LinearLayout>
 
 
-        <ListView
-            android:id="@+id/lv_device"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/white"
-            android:paddingLeft="10dp"
-            android:visibility="visible"
-            android:paddingRight="10dp"
-            android:divider="@color/colorHint"
-            android:dividerHeight="0.1dp"/>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"/>
 
         <LinearLayout
-            android:id="@+id/lly_cancelback"
+            android:id="@+id/lly_openBluetooth"
             android:layout_width="match_parent"
-            android:layout_marginBottom="10dp"
-            android:visibility="gone"
-            android:layout_height="40dp">
+            android:layout_height="match_parent"
+            android:visibility="visible"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
             <TextView
-                android:id="@+id/tv_cancelBack"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="match_parent"
-                android:text="取消返回"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="手机蓝牙未开启"
+                android:textColor="@color/colorBlack"
+                android:padding="10dp"
+                android:textSize="@dimen/activity_text_size"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:src="@mipmap/ic_bluetooth"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="请确保已打开手机蓝牙和冰箱!"
+                android:textColor="@color/colorHint"
+                android:layout_marginTop="40dp"
+                android:textSize="@dimen/activity_text_size_small"/>
+            <TextView
+                android:id="@+id/tv_openBluetooth"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:text="开启蓝牙"
                 android:gravity="center"
-                android:layout_marginLeft="10dp"
+                android:padding="10dp"
+                android:layout_marginTop="40dp"
                 android:background="@drawable/shape_cancelback_btn"
                 android:textColor="@color/colorBlack"
                 android:textSize="@dimen/activity_text_size"/>
-            <TextView
-                android:id="@+id/tv_reSearch"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="match_parent"
-                android:text="重新搜索"
-                android:layout_marginLeft="50dp"
-                android:layout_marginRight="10dp"
-                android:gravity="center"
-                android:background="@drawable/shape_research_btn"
-                android:textColor="@color/colorWhite"
-                android:textSize="@dimen/activity_text_size"/>
         </LinearLayout>
+    </FrameLayout>
 
 
-            <TextView
-                android:id="@+id/lly_adddevice"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:text="+ 添加设备"
-                android:visibility="gone"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:gravity="center"
-                android:background="@drawable/shape_research_btn"
-                android:textColor="@color/colorWhite"
-                android:textSize="@dimen/activity_text_size"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/lly_openbluetooth"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="手机蓝牙未开启"
-            android:textColor="@color/colorBlack"
-            android:padding="10dp"
-            android:textSize="@dimen/activity_text_size"/>
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:src="@mipmap/ic_bluetooth"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="请确保已打开手机蓝牙和冰箱!"
-            android:textColor="@color/colorHint"
-            android:layout_marginTop="40dp"
-            android:textSize="@dimen/activity_text_size_small"/>
-
-        <TextView
-            android:id="@+id/tv_openbluetooth"
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:text="开启蓝牙"
-            android:gravity="center"
-            android:padding="10dp"
-            android:layout_marginTop="40dp"
-            android:background="@drawable/shape_cancelback_btn"
-            android:textColor="@color/colorBlack"
-            android:textSize="@dimen/activity_text_size"/>
-    </LinearLayout>
 
 </LinearLayout>
