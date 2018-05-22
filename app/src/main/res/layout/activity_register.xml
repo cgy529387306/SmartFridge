@@ -106,16 +106,17 @@
     <TextView
         android:id="@+id/tv_register"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="42dp"
         android:layout_marginTop="50dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:background="@mipmap/bind_parent"
+        android:background="@drawable/selector_blue_btn"
         android:textSize="@dimen/activity_text_size"
         android:text="注册"
         android:textColor="@color/colorWhite"
         android:gravity="center"/>
     <TextView
+        android:id="@+id/tv_back"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"

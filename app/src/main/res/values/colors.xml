@@ -16,6 +16,7 @@
     <color name="colorGray">#ffe5e5e5</color>
     <color name="colorGreen">#ff99cc33</color>
     <color name="colorViewBg">#ffeeeeee</color>
+    <color name="colorBlueDark">#2743FF</color>
     <color name="colorBlue">#009EFF</color>
     <color name="colorItemBlue">#ff00b6ce</color>
     <color name="colorItBlue">#ff00c6ce</color>

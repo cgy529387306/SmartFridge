@@ -120,7 +120,7 @@
                       android:layout_marginLeft="50dp"
                       android:layout_marginRight="10dp"
                       android:gravity="center"
-                      android:background="@drawable/shape_research_btn"
+                      android:background="@drawable/selector_blue_btn"
                       android:textColor="@color/colorWhite"
                       android:textSize="@dimen/activity_text_size"/>
               </LinearLayout>
@@ -134,7 +134,7 @@
                   android:layout_marginLeft="10dp"
                   android:layout_marginRight="10dp"
                   android:gravity="center"
-                  android:background="@drawable/shape_research_btn"
+                  android:background="@drawable/selector_blue_btn"
                   android:textColor="@color/colorWhite"
                   android:textSize="@dimen/activity_text_size"/>
           </FrameLayout>

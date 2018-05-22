@@ -41,6 +41,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private DrawerLayoutAdapter drawerlayoutAdapter;
     private DeviceAdapter mDeviceAdapter;
 
+    private TextView tvName;
+
     private LinearLayout llyDevice; //蓝牙设备列表
     private LinearLayout llyOpenBluetooth; // 开启蓝牙界面
     private ImageView ivSearch;
@@ -85,12 +87,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         if(!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             Toast.makeText(this,"不支持BLE", Toast.LENGTH_SHORT).show();
         }
+        tvName = findViewById(R.id.tv_name);
+        tvName.setText(AVUser.getCurrentUser().getUsername());
+
         ivSearch = findViewById(R.id.iv_search);
         tvSearch = findViewById(R.id.tv_search);
         drawerLayout = findViewById(R.id.dl_content_main_menu);
         leftMenu = findViewById(R.id.ll_left_menu);
         lvDrawerlayout = findViewById(R.id.lv_drawerlayout);
-
         llyDevice = findViewById(R.id.lly_device);
         lvDevice = findViewById(R.id.lv_device);
         llyCancelBack =findViewById(R.id.lly_cancelBack);

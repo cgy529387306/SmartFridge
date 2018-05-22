@@ -59,6 +59,7 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
         tvSend = (TextView) findViewById(R.id.tv_send);
         tvSend.setOnClickListener(this);
         findViewById(R.id.tv_register).setOnClickListener(this);
+        findViewById(R.id.tv_back).setOnClickListener(this);
     }
 
 
@@ -75,6 +76,8 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
             }
         }else if (id == R.id.tv_register){
             doRegister();
+        }else if (id == R.id.tv_back){
+            finish();
         }
     }
 
