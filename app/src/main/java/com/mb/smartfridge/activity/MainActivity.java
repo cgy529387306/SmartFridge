@@ -1,6 +1,7 @@
 package com.mb.smartfridge.activity;
 
 import android.bluetooth.BluetoothAdapter;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.AnimationDrawable;
@@ -18,12 +19,16 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.avos.avoscloud.AVUser;
 import com.mb.smartfridge.R;
 import com.mb.smartfridge.adapter.DeviceAdapter;
 import com.mb.smartfridge.adapter.DrawerLayoutAdapter;
 import com.mb.smartfridge.entity.DeviceEntity;
 import com.mb.smartfridge.entity.DrawerlayoutEntity;
+import com.mb.smartfridge.utils.DialogHelper;
 import com.mb.smartfridge.utils.NavigationHelper;
+import com.mb.smartfridge.utils.PreferencesHelper;
+import com.mb.smartfridge.utils.ToastHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -110,7 +115,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                         NavigationHelper.startActivity(MainActivity.this,UpdatePwdActivity.class,null,false);
                         break;
                     case 3:
-                        NavigationHelper.startActivity(MainActivity.this,LoginActivity.class,null,false);
+                        loginOut();
                         break;
                     default:
                         break;
@@ -243,6 +248,40 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             return true;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    // region 双击返回
+    private static final long DOUBLE_CLICK_INTERVAL = 2000;
+    private long mLastClickTimeMills = 0;
+
+    @Override
+    public void onBackPressed() {
+        if (System.currentTimeMillis() - mLastClickTimeMills > DOUBLE_CLICK_INTERVAL) {
+            ToastHelper.showToast("再按一次返回退出");
+            mLastClickTimeMills = System.currentTimeMillis();
+            return;
+        }
+        finish();
+    }
+    // endregion 双击返回
+
+
+    /**
+     * 退出登录
+     */
+    private void loginOut(){
+        //注销账号
+        DialogHelper.showConfirmDialog(MainActivity.this, "注销", "确定要退出当前账号？", true,
+                R.string.dialog_positive, new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        AVUser.getCurrentUser().logOut();
+                        startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                        finish();
+                    }
+
+                }, R.string.dialog_negative, null);
     }
 
 }

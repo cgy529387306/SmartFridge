@@ -7,7 +7,7 @@
     <string name="forget_pwd">忘记密码？</string>
     <string name="get_valid_code">获取验证码</string>
     <string name="reget_after_seconds">秒后重新获取</string>
-    <string name="input_correct_tel">请输入正确的手机号码</string>
+    <string name="input_correct_tel">请输入手机号码</string>
     <string name="send_success">发送成功</string>
     <string name="register_success">注册成功</string>
     <string name="login_success">登录成功</string>
@@ -23,4 +23,6 @@
     <string name="tmall">TAWA\n天猫旗舰店</string>
     <string name="jd">TAWA\n京东旗舰店</string>
     <string name="aboutus">关于我们</string>
+    <string name="dialog_positive">确 定</string>
+    <string name="dialog_negative">取 消</string>
 </resources>

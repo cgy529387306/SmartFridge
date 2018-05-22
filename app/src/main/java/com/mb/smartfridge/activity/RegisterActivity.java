@@ -1,5 +1,6 @@
 package com.mb.smartfridge.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.text.TextUtils;
@@ -7,12 +8,19 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.avos.avoscloud.AVAnalytics;
+import com.avos.avoscloud.AVException;
+import com.avos.avoscloud.AVUser;
+import com.avos.avoscloud.SignUpCallback;
 import com.mb.smartfridge.R;
 import com.mb.smartfridge.api.ApiMethods;
 import com.mb.smartfridge.entity.UserData;
 import com.mb.smartfridge.http.subscribers.ProgressSubscriber;
 import com.mb.smartfridge.http.subscribers.SubscriberOnNextListener;
+import com.mb.smartfridge.utils.ActivityManager;
+import com.mb.smartfridge.utils.ProgressDialogHelper;
 import com.mb.smartfridge.utils.ProjectHelper;
 
 /**
@@ -24,15 +32,12 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
     private EditText etCode;
     private EditText etPwd;
     private TextView tvSend;
-    private SubscriberOnNextListener registerOnNext;
-    private SubscriberOnNextListener sendSmsOnNext;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
         setTitle("注册");
         initView();
-        initNext();
     }
     private void setTitle(String title) {
         TextView tvTitle = findViewById(R.id.tv_title);
@@ -56,24 +61,7 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
         findViewById(R.id.tv_register).setOnClickListener(this);
     }
 
-    private void initNext(){
-        registerOnNext = new SubscriberOnNextListener<UserData>() {
-            @Override
-            public void onNext(UserData subjects) {
-                if (subjects!=null){
-                    showToast(subjects.toString());
-                }
-            }
-        };
-        sendSmsOnNext = new SubscriberOnNextListener<Object>() {
-            @Override
-            public void onNext(Object subjects) {
-                if (subjects!=null){
-                    showToast(subjects.toString());
-                }
-            }
-        };
-    }
+
     @Override
     public void onClick(View view) {
         int id = view.getId();
@@ -110,7 +98,6 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
     }
 
     public void getValidCode() {
-        ApiMethods.getInstance().sendSms(new ProgressSubscriber(sendSmsOnNext, RegisterActivity.this),etTel.getText().toString().trim(),"register");
 
     }
 
@@ -121,10 +108,12 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
         if (TextUtils.isEmpty(mobile)) {
             showToast(getString(R.string.input_correct_tel));
             return;
-        } else if (TextUtils.isEmpty(code)) {
-            showToast(getString(R.string.input_valid_code));
-            return;
-        } else if (TextUtils.isEmpty(password)) {
+        }
+//        else if (TextUtils.isEmpty(code)) {
+//            showToast(getString(R.string.input_valid_code));
+//            return;
+//        }
+        else if (TextUtils.isEmpty(password)) {
             showToast(getString(R.string.input_password));
             return;
         } else if (!ProjectHelper.isMobiPhoneNum(mobile)) {
@@ -134,6 +123,35 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
             showToast(getString(R.string.password_error));
             return;
         }
-        ApiMethods.getInstance().doRegister(new ProgressSubscriber(registerOnNext, RegisterActivity.this), mobile, password, code);
+        ProgressDialogHelper.showProgressDialog(this,"注册中...");
+        AVUser user = new AVUser();// 新建 AVUser 对象实例
+        user.setUsername(mobile);// 设置用户名
+        user.setPassword(password);// 设置密码
+        user.signUpInBackground(new SignUpCallback() {
+            @Override
+            public void done(AVException e) {
+                ProgressDialogHelper.dismissProgressDialog();
+                if (e == null) {
+                    ActivityManager.getInstance().closeAllActivity();
+                    startActivity(new Intent(RegisterActivity.this, MainActivity.class));
+                } else {
+                    showToast(e.getMessage());
+                }
+            }
+        });
+
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        AVAnalytics.onPause(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        AVAnalytics.onResume(this);
     }
 }

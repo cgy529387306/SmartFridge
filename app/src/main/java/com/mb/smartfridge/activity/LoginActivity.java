@@ -1,28 +1,39 @@
 package com.mb.smartfridge.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.avos.avoscloud.AVException;
+import com.avos.avoscloud.AVUser;
+import com.avos.avoscloud.LogInCallback;
 import com.mb.smartfridge.R;
 import com.mb.smartfridge.api.ApiMethods;
 import com.mb.smartfridge.entity.UserData;
 import com.mb.smartfridge.http.subscribers.ProgressSubscriber;
 import com.mb.smartfridge.http.subscribers.SubscriberOnNextListener;
+import com.mb.smartfridge.utils.DialogHelper;
 import com.mb.smartfridge.utils.NavigationHelper;
+import com.mb.smartfridge.utils.ProgressDialogHelper;
 import com.mb.smartfridge.utils.ProjectHelper;
+import com.mb.smartfridge.utils.ToastHelper;
 
 public class LoginActivity extends BaseActivity implements View.OnClickListener {
     private EditText etTel;
     private EditText etPwd;
-    private SubscriberOnNextListener loginOnNext;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        if (AVUser.getCurrentUser() != null) {
+            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+            finish();
+        }
         setTitle("登录");
         initView();
         initNext();
@@ -43,14 +54,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     }
 
     private void initNext(){
-        loginOnNext = new SubscriberOnNextListener<UserData>() {
-            @Override
-            public void onNext(UserData subjects) {
-                if (subjects!=null){
-//                    showToast(subjects.toString());
-                }
-            }
-        };
+
     }
 
 
@@ -64,8 +68,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 NavigationHelper.startActivity(LoginActivity.this,ForgetPwdActivity.class,null,false);
                 break;
             case R.id.tv_login:
-                NavigationHelper.startActivity(LoginActivity.this,MainActivity.class,null,true);
-//                doLogin();
+//                NavigationHelper.startActivity(LoginActivity.this,MainActivity.class,null,true);
+                doLogin();
                 break;
             default:
                 break;
@@ -76,19 +80,46 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         String mobile = etTel.getText().toString().trim();
         String password = etPwd.getText().toString().trim();
         if (TextUtils.isEmpty(mobile)) {
-//            showToast(getString(R.string.input_correct_tel));
+            showToast(getString(R.string.input_correct_tel));
             return;
         }else if (TextUtils.isEmpty(password)){
-//            showToast(getString(R.string.input_password));
+            showToast(getString(R.string.input_password));
             return;
         }else if (!ProjectHelper.isMobiPhoneNum(mobile)) {
-//            showToast(getString(R.string.tel_error));
+            showToast(getString(R.string.tel_error));
             return;
         }else if (!ProjectHelper.isPwdValid(password)) {
-//            showToast(getString(R.string.password_error));
+            showToast(getString(R.string.password_error));
             return;
         }
-        ApiMethods.getInstance().doLogin(new ProgressSubscriber(loginOnNext, LoginActivity.this), mobile, password);
+        ProgressDialogHelper.showProgressDialog(this,"登录中...");
+        AVUser.logInInBackground(mobile, password, new LogInCallback<AVUser>() {
+            @Override
+            public void done(AVUser avUser, AVException e) {
+                ProgressDialogHelper.dismissProgressDialog();
+                if (e == null) {
+                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                    finish();
+                } else {
+                    showToast(e.getMessage());
+                }
+            }
+        });
     }
+
+    // region 双击返回
+    private static final long DOUBLE_CLICK_INTERVAL = 2000;
+    private long mLastClickTimeMills = 0;
+
+    @Override
+    public void onBackPressed() {
+        if (System.currentTimeMillis() - mLastClickTimeMills > DOUBLE_CLICK_INTERVAL) {
+            ToastHelper.showToast("再按一次返回退出");
+            mLastClickTimeMills = System.currentTimeMillis();
+            return;
+        }
+        finish();
+    }
+    // endregion 双击返回
 
 }

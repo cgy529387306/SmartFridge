@@ -35,7 +35,7 @@
         <activity android:name=".activity.ForgetPwdActivity"/>
         <activity android:name=".activity.AboutUsActivity"/>
         <activity android:name=".activity.UpdatePwdActivity"/>
-
+        <meta-data android:name="leancloud" android:value="LeanCloud"/>
     </application>
 
 </manifest>
