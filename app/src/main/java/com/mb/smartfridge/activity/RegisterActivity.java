@@ -12,7 +12,10 @@ import android.widget.Toast;
 
 import com.avos.avoscloud.AVAnalytics;
 import com.avos.avoscloud.AVException;
+import com.avos.avoscloud.AVMobilePhoneVerifyCallback;
+import com.avos.avoscloud.AVOSCloud;
 import com.avos.avoscloud.AVUser;
+import com.avos.avoscloud.RequestMobileCodeCallback;
 import com.avos.avoscloud.SignUpCallback;
 import com.mb.smartfridge.R;
 import com.mb.smartfridge.api.ApiMethods;
@@ -101,21 +104,40 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
     }
 
     public void getValidCode() {
-
-    }
-
-    public void doRegister() {
         String mobile = etTel.getText().toString().trim();
-        String password = etPwd.getText().toString().trim();
-        String code = etCode.getText().toString().trim();
         if (TextUtils.isEmpty(mobile)) {
             showToast(getString(R.string.input_correct_tel));
             return;
         }
-//        else if (TextUtils.isEmpty(code)) {
-//            showToast(getString(R.string.input_valid_code));
-//            return;
-//        }
+        if (!ProjectHelper.isMobiPhoneNum(mobile)) {
+            showToast(getString(R.string.tel_error));
+            return;
+        }
+        ProgressDialogHelper.showProgressDialog(this,"发送中...");
+        AVOSCloud.requestSMSCodeInBackground(mobile, "SmsDemo", "注册", 10, new RequestMobileCodeCallback() {
+            @Override
+            public void done(AVException e) {
+                ProgressDialogHelper.dismissProgressDialog();
+                if (e == null) {
+                    showToast(getString(R.string.send_success));
+                } else {
+                    ProjectHelper.showErrorMessage(e.getMessage());
+                }
+            }
+        });
+    }
+
+    public void doRegister() {
+        final String mobile = etTel.getText().toString().trim();
+        final String password = etPwd.getText().toString().trim();
+        String code = etCode.getText().toString().trim();
+        if (TextUtils.isEmpty(mobile)) {
+            showToast(getString(R.string.input_correct_tel));
+            return;
+        } else if (TextUtils.isEmpty(code)) {
+            showToast(getString(R.string.input_valid_code));
+            return;
+        }
         else if (TextUtils.isEmpty(password)) {
             showToast(getString(R.string.input_password));
             return;
@@ -127,6 +149,21 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
             return;
         }
         ProgressDialogHelper.showProgressDialog(this,"注册中...");
+        AVOSCloud.verifySMSCodeInBackground(code, mobile,
+                new AVMobilePhoneVerifyCallback() {
+                    @Override
+                    public void done(AVException e) {
+                        if (e == null) {
+                            register(mobile,password);
+                        } else {
+                            ProgressDialogHelper.dismissProgressDialog();
+                            ProjectHelper.showErrorMessage(e.getMessage());
+                        }
+                    }
+                });
+    }
+
+    private void register(String mobile,String password){
         AVUser user = new AVUser();// 新建 AVUser 对象实例
         user.setUsername(mobile);// 设置用户名
         user.setPassword(password);// 设置密码
@@ -138,11 +175,10 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
                     ActivityManager.getInstance().closeAllActivity();
                     startActivity(new Intent(RegisterActivity.this, MainActivity.class));
                 } else {
-                    showToast(e.getMessage());
+                    ProjectHelper.showErrorMessage(e.getMessage());
                 }
             }
         });
-
     }
 
 

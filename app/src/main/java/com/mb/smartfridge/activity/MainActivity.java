@@ -114,6 +114,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                         NavigationHelper.startActivity(MainActivity.this,AboutUsActivity.class,null,false);
                         break;
                     case 1:
+                        NavigationHelper.startActivity(MainActivity.this,SmartFridgeActivity.class,null,false);
                         break;
                     case 2:
                         NavigationHelper.startActivity(MainActivity.this,UpdatePwdActivity.class,null,false);

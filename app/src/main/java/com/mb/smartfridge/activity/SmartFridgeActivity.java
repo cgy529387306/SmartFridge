@@ -17,7 +17,7 @@ public class SmartFridgeActivity extends BaseActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_smartfridge);
-        setTitle("");
+        setTitle("车载冰箱");
     }
     private void setTitle(String title) {
         TextView tvTitle = findViewById(R.id.tv_title);

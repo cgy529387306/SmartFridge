@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import android.view.View;
 
 import com.google.gson.Gson;
+import com.mb.smartfridge.entity.ErrorResp;
 
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -143,6 +144,43 @@ public class ProjectHelper {
         } catch (ActivityNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void showErrorMessage(String message){
+        String errorMessage = "服务器内部错误";
+        if (!TextUtils.isEmpty(message)){
+            ErrorResp errorResp = JsonHelper.fromJson(message, ErrorResp.class);
+            if (errorResp!=null){
+                int errorCode = errorResp.getCode();
+                if (errorCode == 200){
+                    errorMessage = "没有提供用户名，或者用户名为空";
+                }else if (errorCode == 201){
+                    errorMessage = "没有提供密码，或者密码为空";
+                }else if (errorCode == 202){
+                    errorMessage = "用户名已经被占用";
+                }else if (errorCode == 210){
+                    errorMessage = "用户名和密码不匹配";
+                }else if (errorCode == 211){
+                    errorMessage = "找不到用户";
+                }else if (errorCode == 214){
+                    errorMessage = "手机号码已经被注册";
+                }else if (errorCode == 215){
+                    errorMessage = "未验证的手机号码";
+                }else if (errorCode == 217){
+                    errorMessage = "无效的用户名，不允许空白用户名";
+                }else if (errorCode == 218){
+                    errorMessage = "无效的密码，不允许空白密码";
+                }else if (errorCode == 601){
+                    errorMessage = "发送短信过于频繁";
+                }else if (errorCode == 602){
+                    errorMessage = "发送短信或者语音验证码失败";
+                }else if (errorCode == 603){
+                    errorMessage = "验证码错误";
+                }
+            }
+        }
+        ToastHelper.showToast(errorMessage);
+
     }
 
 
