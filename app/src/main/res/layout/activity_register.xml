@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@mipmap/img_select_device"
+    android:background="@mipmap/img_background"
     android:orientation="vertical">
 
     <include layout="@layout/base_layout"/>
@@ -57,13 +57,14 @@
         <View
             android:layout_width="0.1dp"
             android:layout_height="20dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
             android:background="@color/colorHint"/>
 
         <TextView
             android:id="@+id/tv_send"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginLeft="15dp"
             android:gravity="end|bottom"
             android:textColor="@color/colorHint"
             android:textSize="@dimen/activity_text_size_small"

@@ -5,20 +5,13 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.avos.avoscloud.AVAnalytics;
 import com.avos.avoscloud.AVException;
 import com.avos.avoscloud.AVUser;
 import com.avos.avoscloud.LogInCallback;
 import com.mb.smartfridge.R;
-import com.mb.smartfridge.api.ApiMethods;
-import com.mb.smartfridge.entity.UserData;
-import com.mb.smartfridge.http.subscribers.ProgressSubscriber;
-import com.mb.smartfridge.http.subscribers.SubscriberOnNextListener;
-import com.mb.smartfridge.utils.DialogHelper;
 import com.mb.smartfridge.utils.NavigationHelper;
 import com.mb.smartfridge.utils.ProgressDialogHelper;
 import com.mb.smartfridge.utils.ProjectHelper;
@@ -94,7 +87,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             return;
         }
         ProgressDialogHelper.showProgressDialog(this,"登录中...");
-        AVUser.logInInBackground(mobile, password, new LogInCallback<AVUser>() {
+        AVUser.loginByMobilePhoneNumberInBackground(mobile, password, new LogInCallback<AVUser>() {
             @Override
             public void done(AVUser avUser, AVException e) {
                 ProgressDialogHelper.dismissProgressDialog();

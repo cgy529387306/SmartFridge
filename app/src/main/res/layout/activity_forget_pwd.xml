@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@mipmap/img_select_device"
+    android:background="@mipmap/img_background"
     android:orientation="vertical">
 
     <include layout="@layout/base_layout"/>
@@ -48,7 +48,7 @@
             android:drawablePadding="10dp"
             android:layout_height="match_parent"
             android:textColorHint="@color/colorHint"
-            android:textColor="@color/colorBlack"
+            android:textColor="@color/colorWhite"
             android:background="@null"
             android:hint="输入验证码"
             android:textSize="@dimen/activity_text_size"
@@ -57,13 +57,14 @@
         <View
             android:layout_width="0.1dp"
             android:layout_height="20dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
             android:background="@color/colorHint"/>
 
         <TextView
             android:id="@+id/tv_send"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginLeft="15dp"
             android:gravity="end|bottom"
             android:textColor="@color/colorHint"
             android:textSize="@dimen/activity_text_size_small"
@@ -90,7 +91,7 @@
         android:drawableLeft="@mipmap/ic_login_password"
         android:drawablePadding="10dp"
         android:textColorHint="@color/colorHint"
-        android:textColor="@color/colorBlack"
+        android:textColor="@color/colorWhite"
         android:background="@null"
         android:hint="设置新的密码"
         android:textSize="@dimen/activity_text_size"

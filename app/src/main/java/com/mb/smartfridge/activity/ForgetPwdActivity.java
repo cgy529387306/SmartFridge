@@ -8,10 +8,12 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.avos.avoscloud.AVException;
+import com.avos.avoscloud.AVUser;
+import com.avos.avoscloud.RequestMobileCodeCallback;
+import com.avos.avoscloud.UpdatePasswordCallback;
 import com.mb.smartfridge.R;
-import com.mb.smartfridge.api.ApiMethods;
-import com.mb.smartfridge.http.subscribers.ProgressSubscriber;
-import com.mb.smartfridge.http.subscribers.SubscriberOnNextListener;
+import com.mb.smartfridge.utils.ProgressDialogHelper;
 import com.mb.smartfridge.utils.ProjectHelper;
 
 /**
@@ -23,16 +25,13 @@ public class ForgetPwdActivity extends BaseActivity implements View.OnClickListe
     private EditText etCode;
     private EditText etPwd;
     private TextView tvSend;
-    private SubscriberOnNextListener forgetPwdOnNext;
-    private SubscriberOnNextListener sendSmsOnNext;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView( R.layout.activity_forget_pwd);
-        setTitle("忘记密码");
+        int type = getIntent().getIntExtra("type",0);
+        setTitle(type==0?"忘记密码":"修改密码");
         initView();
-        initNext();
     }
 
     private void setTitle(String title) {
@@ -55,24 +54,6 @@ public class ForgetPwdActivity extends BaseActivity implements View.OnClickListe
         tvSend.setOnClickListener(this);
         findViewById(R.id.tv_confirm).setOnClickListener(this);
     }
-    private void initNext(){
-        forgetPwdOnNext = new SubscriberOnNextListener<Object>() {
-            @Override
-            public void onNext(Object subjects) {
-                if (subjects!=null){
-                    showToast(subjects.toString());
-                }
-            }
-        };
-        sendSmsOnNext = new SubscriberOnNextListener<Object>() {
-            @Override
-            public void onNext(Object subjects) {
-                if (subjects!=null){
-                    showToast(subjects.toString());
-                }
-            }
-        };
-    }
 
     @Override
     public void onClick(View v) {
@@ -86,14 +67,14 @@ public class ForgetPwdActivity extends BaseActivity implements View.OnClickListe
                 getValidCode();
             }
         }else if (id == R.id.tv_confirm){
-            doGetPw();
+            doModify();
         }
     }
 
-    private void doGetPw() {
+    private void doModify() {
         String mobile = etTel.getText().toString().trim();
-        String password = etPwd.getText().toString().trim();
-        String code = etCode.getText().toString().trim();
+        final String password = etPwd.getText().toString().trim();
+        final String code = etCode.getText().toString().trim();
         if (TextUtils.isEmpty(mobile)) {
             showToast(getString(R.string.input_correct_tel));
             return;
@@ -110,8 +91,20 @@ public class ForgetPwdActivity extends BaseActivity implements View.OnClickListe
             showToast(getString(R.string.password_error));
             return;
         }
-        ApiMethods.getInstance().getpw(new ProgressSubscriber(forgetPwdOnNext, ForgetPwdActivity.this), mobile, password, code);
+        AVUser.resetPasswordBySmsCodeInBackground(code, password, new UpdatePasswordCallback() {
+            @Override
+            public void done(AVException e) {
+                ProgressDialogHelper.dismissProgressDialog();
+                if (e == null) {
+                    showToast(getString(R.string.modify_success));
+                    finish();
+                } else {
+                    ProjectHelper.showErrorMessage(e.getMessage());
+                }
+            }
+        });
     }
+
 
     class TimeCount extends CountDownTimer {
         public TimeCount(long millisInFuture, long countDownInterval) {
@@ -132,6 +125,26 @@ public class ForgetPwdActivity extends BaseActivity implements View.OnClickListe
     }
 
     public void getValidCode() {
-        ApiMethods.getInstance().sendSms(new ProgressSubscriber(sendSmsOnNext, ForgetPwdActivity.this), etTel.getText().toString().trim(), "getpw");
+        String mobile = etTel.getText().toString().trim();
+        if (TextUtils.isEmpty(mobile)) {
+            showToast(getString(R.string.input_correct_tel));
+            return;
+        }
+        if (!ProjectHelper.isMobiPhoneNum(mobile)) {
+            showToast(getString(R.string.tel_error));
+            return;
+        }
+        ProgressDialogHelper.showProgressDialog(this,"发送中...");
+        AVUser.requestPasswordResetBySmsCodeInBackground(mobile, new RequestMobileCodeCallback() {
+            @Override
+            public void done(AVException e) {
+                ProgressDialogHelper.dismissProgressDialog();
+                if (e == null) {
+                    showToast(getString(R.string.send_success));
+                } else {
+                    ProjectHelper.showErrorMessage(e.getMessage());
+                }
+            }
+        });
     }
 }

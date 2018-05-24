@@ -158,6 +158,8 @@ public class ProjectHelper {
                     errorMessage = "没有提供密码，或者密码为空";
                 }else if (errorCode == 202){
                     errorMessage = "用户名已经被占用";
+                }else if (errorCode == 203){
+                    errorMessage = "电子邮箱地址已经被占用";
                 }else if (errorCode == 210){
                     errorMessage = "用户名和密码不匹配";
                 }else if (errorCode == 211){

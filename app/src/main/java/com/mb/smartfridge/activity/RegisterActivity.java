@@ -8,20 +8,15 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.avos.avoscloud.AVAnalytics;
 import com.avos.avoscloud.AVException;
-import com.avos.avoscloud.AVMobilePhoneVerifyCallback;
 import com.avos.avoscloud.AVOSCloud;
 import com.avos.avoscloud.AVUser;
+import com.avos.avoscloud.LogInCallback;
 import com.avos.avoscloud.RequestMobileCodeCallback;
-import com.avos.avoscloud.SignUpCallback;
+import com.avos.avoscloud.SaveCallback;
 import com.mb.smartfridge.R;
-import com.mb.smartfridge.api.ApiMethods;
-import com.mb.smartfridge.entity.UserData;
-import com.mb.smartfridge.http.subscribers.ProgressSubscriber;
-import com.mb.smartfridge.http.subscribers.SubscriberOnNextListener;
 import com.mb.smartfridge.utils.ActivityManager;
 import com.mb.smartfridge.utils.ProgressDialogHelper;
 import com.mb.smartfridge.utils.ProjectHelper;
@@ -78,7 +73,7 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
                 getValidCode();
             }
         }else if (id == R.id.tv_register){
-            doRegister();
+            validCode();
         }else if (id == R.id.tv_back){
             finish();
         }
@@ -114,7 +109,7 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
             return;
         }
         ProgressDialogHelper.showProgressDialog(this,"发送中...");
-        AVOSCloud.requestSMSCodeInBackground(mobile, "SmsDemo", "注册", 10, new RequestMobileCodeCallback() {
+        AVOSCloud.requestSMSCodeInBackground(mobile, new RequestMobileCodeCallback() {
             @Override
             public void done(AVException e) {
                 ProgressDialogHelper.dismissProgressDialog();
@@ -127,7 +122,7 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
         });
     }
 
-    public void doRegister() {
+    public void validCode() {
         final String mobile = etTel.getText().toString().trim();
         final String password = etPwd.getText().toString().trim();
         String code = etCode.getText().toString().trim();
@@ -149,34 +144,29 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
             return;
         }
         ProgressDialogHelper.showProgressDialog(this,"注册中...");
-        AVOSCloud.verifySMSCodeInBackground(code, mobile,
-                new AVMobilePhoneVerifyCallback() {
-                    @Override
-                    public void done(AVException e) {
-                        if (e == null) {
-                            register(mobile,password);
-                        } else {
-                            ProgressDialogHelper.dismissProgressDialog();
-                            ProjectHelper.showErrorMessage(e.getMessage());
-                        }
-                    }
-                });
-    }
-
-    private void register(String mobile,String password){
-        AVUser user = new AVUser();// 新建 AVUser 对象实例
-        user.setUsername(mobile);// 设置用户名
-        user.setPassword(password);// 设置密码
-        user.signUpInBackground(new SignUpCallback() {
+        AVUser.signUpOrLoginByMobilePhoneInBackground(mobile, code, new LogInCallback<AVUser>() {
             @Override
-            public void done(AVException e) {
+            public void done(AVUser avUser, AVException e) {
                 ProgressDialogHelper.dismissProgressDialog();
                 if (e == null) {
-                    ActivityManager.getInstance().closeAllActivity();
-                    startActivity(new Intent(RegisterActivity.this, MainActivity.class));
+                    doRegister(password);
                 } else {
                     ProjectHelper.showErrorMessage(e.getMessage());
                 }
+            }
+        });
+    }
+
+    private void doRegister(final String password){
+        AVUser.getCurrentUser().setPassword(password);
+        AVUser.getCurrentUser().saveInBackground(new SaveCallback() {
+            @Override
+            public void done(AVException e) {
+                AVUser.getCurrentUser().setPassword(password);
+                AVUser.getCurrentUser().saveInBackground();
+                showToast(getString(R.string.register_success));
+                ActivityManager.getInstance().closeAllActivity();
+                startActivity(new Intent(RegisterActivity.this, MainActivity.class));
             }
         });
     }

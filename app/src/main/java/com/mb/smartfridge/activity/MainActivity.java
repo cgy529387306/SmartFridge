@@ -27,7 +27,6 @@ import com.mb.smartfridge.entity.DeviceEntity;
 import com.mb.smartfridge.entity.DrawerlayoutEntity;
 import com.mb.smartfridge.utils.DialogHelper;
 import com.mb.smartfridge.utils.NavigationHelper;
-import com.mb.smartfridge.utils.PreferencesHelper;
 import com.mb.smartfridge.utils.ToastHelper;
 
 import java.util.ArrayList;
@@ -117,7 +116,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                         NavigationHelper.startActivity(MainActivity.this,SmartFridgeActivity.class,null,false);
                         break;
                     case 2:
-                        NavigationHelper.startActivity(MainActivity.this,UpdatePwdActivity.class,null,false);
+                        Bundle bundle = new Bundle();
+                        bundle.putInt("type",1);
+                        NavigationHelper.startActivity(MainActivity.this,ForgetPwdActivity.class,bundle,false);
                         break;
                     case 3:
                         loginOut();
