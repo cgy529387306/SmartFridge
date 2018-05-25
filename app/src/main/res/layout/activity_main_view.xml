@@ -81,16 +81,14 @@
                            android:textSize="@dimen/activity_text_size_low"/>
                    </LinearLayout>
                </LinearLayout>
-               <ListView
+               <android.support.v7.widget.RecyclerView
                    android:id="@+id/lv_device"
                    android:layout_width="match_parent"
                    android:layout_height="wrap_content"
                    android:background="@color/white"
                    android:paddingLeft="10dp"
                    android:visibility="visible"
-                   android:paddingRight="10dp"
-                   android:divider="@color/colorHint"
-                   android:dividerHeight="0.1dp"/>
+                   android:paddingRight="10dp"/>
            </FrameLayout>
           <FrameLayout
               android:layout_width="match_parent"
