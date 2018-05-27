@@ -32,7 +32,6 @@ import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.mb.smartfridge.R;
 import com.mb.smartfridge.adapter.DeviceAdapter;
 import com.mb.smartfridge.adapter.DrawerLayoutAdapter;
-import com.mb.smartfridge.entity.DeviceEntity;
 import com.mb.smartfridge.entity.DrawerlayoutEntity;
 import com.mb.smartfridge.utils.CommonUtils;
 import com.mb.smartfridge.utils.DialogHelper;
@@ -66,7 +65,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private List<DrawerlayoutEntity> list = new ArrayList<>();
     private int img[] = new int[]{R.mipmap.ic_about,R.mipmap.ic_store,R.mipmap.ic_edit_password,R.mipmap.ic_logout};
     private String[] text = new String[]{"关于我们","线上商城","修改密码","退出登录"};
-    private List<DeviceEntity> mDeviceEntityList = new ArrayList<>();
     private BluetoothAdapter bluetoothAdapter;
     private List<BluetoothDevice> deviceList;
     @Override
@@ -190,7 +188,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }else {
             llyOpenBluetooth.setVisibility(View.VISIBLE);
             llyDevice.setVisibility(View.GONE);
-            bluetoothAdapter.enable();
         }
     }
 
@@ -243,7 +240,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     private void checkDevice() {
-        if (mDeviceEntityList.size() > 0){
+        if (deviceList.size() > 0){
             ivSearch.setVisibility(View.GONE);
             tvSearch.setText("我的设备");
             llyCancelBack.setVisibility(View.VISIBLE);
