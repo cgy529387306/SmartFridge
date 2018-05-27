@@ -12,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -172,8 +173,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      * 初始化蓝牙管理，设置监听
      */
     public void initBlueManager() {
-        checkBluetooth();
-        //注册广播
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
         intentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
@@ -191,6 +190,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }else {
             llyOpenBluetooth.setVisibility(View.VISIBLE);
             llyDevice.setVisibility(View.GONE);
+            bluetoothAdapter.enable();
         }
     }
 
@@ -262,7 +262,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.tv_openBluetooth:  // 打开蓝牙
-                bluetoothAdapter.enable();
+                Intent intent =  new Intent(Settings.ACTION_BLUETOOTH_SETTINGS);
+                startActivity(intent);
                 break;
             case R.id.tv_addDevice:  //  添加设备
                 searchDevice();
@@ -279,16 +280,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        checkBluetooth();
-    }
-
-    @Override
     protected void onPause() {
         super.onPause();
     }
 
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkBluetooth();
+    }
 
     @Override
     protected void onDestroy() {
