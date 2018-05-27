@@ -17,6 +17,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -184,7 +185,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         if (bluetoothAdapter.isEnabled()){
             llyDevice.setVisibility(View.VISIBLE);
             llyOpenBluetooth.setVisibility(View.GONE);
-            checkDevice();
+            searchDevice();
         }else {
             llyOpenBluetooth.setVisibility(View.VISIBLE);
             llyDevice.setVisibility(View.GONE);
@@ -239,15 +240,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         lvDevice.setVisibility(CommonUtils.isEmpty(deviceList)?View.GONE:View.VISIBLE);
     }
 
-    private void checkDevice() {
-        if (deviceList.size() > 0){
-            ivSearch.setVisibility(View.GONE);
-            tvSearch.setText("我的设备");
-            llyCancelBack.setVisibility(View.VISIBLE);
-        }else { //没有设备就自动搜索
-            searchDevice();
-        }
-    }
 
     private void initDrawerLayout(){
         for (int i = 0;i < img.length;i++) {
@@ -357,6 +349,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             Method method = BluetoothDevice.class.getMethod("createBond");
             Log.e(getPackageName(), "开始配对");
             method.invoke(deviceList.get(i));
+            ToastHelper.showToast("请求配对,请稍等...");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -373,16 +366,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 Log.e(getPackageName(), "找到新设备了");
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 boolean addFlag = true;
-                for (BluetoothDevice bluetoothDevice : deviceList) {
+                for (int i=0;i<deviceList.size();i++) {
+                    BluetoothDevice bluetoothDevice = deviceList.get(i);
                     if (device.getAddress().equals(bluetoothDevice.getAddress())) {
                         addFlag = false;
+                        deviceList.set(i,device);
                     }
                 }
-
                 if (addFlag) {
                     deviceList.add(device);
-                    deviceAdapter.notifyDataSetChanged();
                 }
+                deviceAdapter.notifyDataSetChanged();
             } else if (intent.getAction().equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)) {
                 searchComplete();
             }else if (intent.getAction().equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
@@ -396,6 +390,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                         break;
                     case BluetoothDevice.BOND_BONDED:
                         Log.e(getPackageName(), "配对成功");
+                        showToast("配对成功");
+                        updateDeviceState(device);
                         break;
                 }
 
@@ -405,5 +401,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
 
+    private void updateDeviceState(BluetoothDevice device){
+        if (device!=null && CommonUtils.isNotEmpty(deviceList)){
+            for (int i=0;i<deviceList.size();i++){
+                BluetoothDevice bluetoothDevice = deviceList.get(i);
+                if (!TextUtils.isEmpty(bluetoothDevice.getAddress()) && bluetoothDevice.getAddress().equals(device.getAddress())){
+                    deviceList.set(i,device);
+                    deviceAdapter.notifyDataSetChanged();
+                }
+            }
+        }
+    }
 
 }

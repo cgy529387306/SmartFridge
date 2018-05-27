@@ -14,6 +14,8 @@ import android.widget.Toast;
 import com.mb.smartfridge.R;
 
 import java.io.OutputStream;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 /**
@@ -28,14 +30,20 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
     private ImageView ivBatteryState,ivEnergyState;
     private TextView tvBatteryState,tvEnergyState;
     private TextView tvBatteryVoltage,tvBatteryQuantity;
+
+    private final Timer timer = new Timer();
+    private TimerTask task;
     @SuppressLint("HandlerLeak")
-    private Handler mHandler = new Handler() {
+    private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what) {
                 case 1:
                     Toast.makeText(SmartFridgeActivity.this, "发送成功", Toast.LENGTH_SHORT).show();
+                    break;
+                case 2:
+                    getData();
                     break;
             }
         }
@@ -48,6 +56,7 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
         setTitle("车载冰箱");
         initView();
         initListener();
+        initTask();
     }
 
     private void setTitle(String title) {
@@ -80,6 +89,23 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
         findViewById(R.id.iv_power_off).setOnClickListener(this);
     }
 
+    private void initTask(){
+        task = new TimerTask() {
+            @Override
+            public void run() {
+                Message message = new Message();
+                message.what = 2;
+                handler.sendMessage(message);
+            }
+        };
+        timer.schedule(task, 1000, 2000);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        timer.cancel();
+    }
 
     private void sendMessage(final String msg) {
         new Thread(new Runnable() {
@@ -92,12 +118,16 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
                     os = socket.getOutputStream();
                     os.write(msg.getBytes());
                     os.flush();
-                    mHandler.sendEmptyMessage(1);
+                    handler.sendEmptyMessage(1);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }).start();
+    }
+
+    private void getData(){
+
     }
 
     @Override
