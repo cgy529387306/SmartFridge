@@ -40,6 +40,7 @@
     </LinearLayout>
 
     <TextView
+        android:id="@+id/tv_bound_state"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:text="未连接"
@@ -48,6 +49,7 @@
         android:textSize="@dimen/activity_text_size_small" />
 
     <ImageView
+        android:id="@+id/iv_bound_state"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_marginLeft="10dp"

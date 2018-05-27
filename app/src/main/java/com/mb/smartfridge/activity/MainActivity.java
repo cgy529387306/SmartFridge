@@ -1,20 +1,18 @@
 package com.mb.smartfridge.activity;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -27,17 +25,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.avos.avoscloud.AVUser;
-import com.calypso.bluelib.bean.MessageBean;
-import com.calypso.bluelib.bean.SearchResult;
-import com.calypso.bluelib.listener.OnConnectListener;
-import com.calypso.bluelib.listener.OnReceiveMessageListener;
-import com.calypso.bluelib.listener.OnSearchDeviceListener;
-import com.calypso.bluelib.listener.OnSendMessageListener;
-import com.calypso.bluelib.manage.BlueManager;
-import com.calypso.bluelib.utils.TypeConversion;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.mb.smartfridge.R;
 import com.mb.smartfridge.adapter.DeviceAdapter;
@@ -47,16 +36,15 @@ import com.mb.smartfridge.entity.DrawerlayoutEntity;
 import com.mb.smartfridge.utils.CommonUtils;
 import com.mb.smartfridge.utils.DialogHelper;
 import com.mb.smartfridge.utils.NavigationHelper;
-import com.mb.smartfridge.utils.ProgressDialogHelper;
 import com.mb.smartfridge.utils.ToastHelper;
 import com.mb.smartfridge.views.DividerItemDecoration;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener {
-
-    public static final String TAG = "MainActivity";
+    private static final int REQUEST_PERMISSION_ACCESS_LOCATION = 1;
 
     private ListView lvDrawerlayout;
     private RecyclerView lvDevice;
@@ -79,34 +67,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private String[] text = new String[]{"关于我们","线上商城","修改密码","退出登录"};
     private List<DeviceEntity> mDeviceEntityList = new ArrayList<>();
     private BluetoothAdapter bluetoothAdapter;
-    private List<SearchResult> deviceList;
-    private BlueManager blueManager;
-
-    private OnConnectListener onConnectListener;
-    private OnSendMessageListener onSendMessageListener;
-    private OnSearchDeviceListener onSearchDeviceListener;
-    private OnReceiveMessageListener onReceiveMessageListener;
-    @SuppressLint("HandlerLeak")
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            String message = msg.obj.toString();
-            showToast(message);
-            switch (msg.what) {
-                case 0:
-                    break;
-                case 1:
-                    break;
-                case 2:
-                    break;
-                case 3:
-                    break;
-                case 4:
-                    break;
-            }
-        }
-    };
+    private List<BluetoothDevice> deviceList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -168,9 +129,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         findViewById(R.id.tv_cancelBack).setOnClickListener(this);
         deviceAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                String mac = deviceList.get(position).getAddress();
-                blueManager.connectDevice(mac);
+            public void onItemClick(BaseQuickAdapter adapter, View view, int i) {
+                if (bluetoothAdapter.isDiscovering())
+                    bluetoothAdapter.cancelDiscovery();
+                if (deviceList.get(i).getBondState() == BluetoothDevice.BOND_NONE) {
+                    bondDevice(i);
+                } else if (deviceList.get(i).getBondState() == BluetoothDevice.BOND_BONDED) {
+                    Bundle bundle = new Bundle();
+                    bundle.putParcelable("device",deviceList.get(i));
+                    NavigationHelper.startActivity(MainActivity.this,SmartFridgeActivity.class,bundle,false);
+                }
             }
         });
 
@@ -204,154 +172,15 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      * 初始化蓝牙管理，设置监听
      */
     public void initBlueManager() {
-        if (Build.VERSION.SDK_INT >= 23) {
-            if (ContextCompat.checkSelfPermission(MainActivity.this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 2);
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                        Manifest.permission.READ_CONTACTS)) {
-                    Toast.makeText(MainActivity.this, "shouldShowRequestPermissionRationale", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-        onSearchDeviceListener = new OnSearchDeviceListener() {
-            @Override
-            public void onStartDiscovery() {
-                sendMessage(0, "正在搜索设备..");
-                Log.d(TAG, "onStartDiscovery()");
-            }
-
-            @Override
-            public void onNewDeviceFound(BluetoothDevice device) {
-                Log.d(TAG, "new device: " + device.getName() + " " + device.getAddress());
-            }
-
-            @Override
-            public void onSearchCompleted(List<SearchResult> bondedList, List<SearchResult> newList) {
-                Log.d(TAG, "SearchCompleted: bondedList" + bondedList.toString());
-                Log.d(TAG, "SearchCompleted: newList" + newList.toString());
-                ivSearch.setVisibility(View.GONE);
-                tvSearch.setText("我的设备");
-                deviceList.clear();
-                deviceList.addAll(newList);
-                deviceAdapter.notifyDataSetChanged();
-                sendMessage(0, CommonUtils.isEmpty(deviceList)?"无可连接设备":"搜索完成,点击列表进行连接！");
-                llyNoDevice.setVisibility(CommonUtils.isEmpty(deviceList)?View.VISIBLE:View.GONE);
-                lvDevice.setVisibility(CommonUtils.isEmpty(deviceList)?View.GONE:View.VISIBLE);
-            }
-
-            @Override
-            public void onError(Exception e) {
-                sendMessage(0, "搜索失败");
-            }
-        };
-        onConnectListener = new OnConnectListener() {
-            @Override
-            public void onConnectStart() {
-                ProgressDialogHelper.showProgressDialog(MainActivity.this,"连接中...");
-                Log.i("blue", "onConnectStart");
-            }
-
-            @Override
-            public void onConnectting() {
-                Log.i("blue", "onConnectting");
-            }
-
-            @Override
-            public void onConnectFailed() {
-                ProgressDialogHelper.dismissProgressDialog();
-                sendMessage(0, "连接失败！");
-                Log.i("blue", "onConnectFailed");
-            }
-
-            @Override
-            public void onConectSuccess(String mac) {
-                ProgressDialogHelper.dismissProgressDialog();
-                sendMessage(4, "连接成功 MAC: " + mac);
-                Log.i("blue", "onConectSuccess");
-            }
-
-            @Override
-            public void onError(Exception e) {
-                ProgressDialogHelper.dismissProgressDialog();
-                sendMessage(0, "连接异常！");
-                Log.i("blue", "onError");
-            }
-        };
-        onSendMessageListener = new OnSendMessageListener() {
-            @Override
-            public void onSuccess(int status, String response) {
-                sendMessage(0, "发送成功！");
-                Log.i("blue", "send message is success ! ");
-            }
-
-            @Override
-            public void onConnectionLost(Exception e) {
-                sendMessage(0, "连接断开！");
-                Log.i("blue", "send message is onConnectionLost ! ");
-            }
-
-            @Override
-            public void onError(Exception e) {
-                sendMessage(0, "发送失败！");
-                Log.i("blue", "send message is onError ! ");
-            }
-        };
-        onReceiveMessageListener = new OnReceiveMessageListener() {
-
-
-            @Override
-            public void onProgressUpdate(String what, int progress) {
-                sendMessage(1, what);
-            }
-
-            @Override
-            public void onDetectDataUpdate(String what) {
-                sendMessage(3, what);
-            }
-
-            @Override
-            public void onDetectDataFinish() {
-                sendMessage(2, "接收完成！");
-                Log.i("blue", "receive message is onDetectDataFinish");
-            }
-
-            @Override
-            public void onNewLine(String s) {
-                sendMessage(3, s);
-            }
-
-            @Override
-            public void onConnectionLost(Exception e) {
-                sendMessage(0, "连接断开");
-                Log.i("blue", "receive message is onConnectionLost ! ");
-            }
-
-            @Override
-            public void onError(Exception e) {
-                Log.i("blue", "receive message is onError ! ");
-            }
-        };
-        blueManager = BlueManager.getInstance(getApplicationContext());
-        blueManager.setOnSearchDeviceListener(onSearchDeviceListener);
-        blueManager.setOnConnectListener(onConnectListener);
-        blueManager.setOnSendMessageListener(onSendMessageListener);
-        blueManager.setOnReceiveMessageListener(onReceiveMessageListener);
-        blueManager.requestEnableBt();
+        checkBluetooth();
+        //注册广播
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
+        intentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+        intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        registerReceiver(new BluetoothReceiver(), intentFilter);
     }
 
-    /**
-     * @param type    0 修改状态  1 更新进度  2 体检完成  3 体检数据进度
-     * @param context
-     */
-    public void sendMessage(int type, String context) {
-        if (handler != null) {
-            Message message = handler.obtainMessage();
-            message.what = type;
-            message.obj = context;
-            handler.sendMessage(message);
-        }
-    }
 
     private void checkBluetooth() {
          bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -372,15 +201,45 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         tvAddDevice.setVisibility(View.GONE);
         AnimationDrawable anim = (AnimationDrawable) ivSearch.getBackground();
         anim.start();
-        blueManager.setReadVersion(false);
-        blueManager.searchDevices();
+        requestPermission();
+    }
+
+    private void requestPermission() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            int checkAccessFinePermission = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+            if (checkAccessFinePermission != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        REQUEST_PERMISSION_ACCESS_LOCATION);
+                Log.e(getPackageName(), "没有权限，请求权限");
+                return;
+            }
+            Log.e(getPackageName(), "已有定位权限");
+            search();
+        }
+    }
+
+    public void search() {
+        if (bluetoothAdapter.isDiscovering())
+            bluetoothAdapter.cancelDiscovery();
+        bluetoothAdapter.startDiscovery();
+        Log.e(getPackageName(), "开始搜索");
     }
 
     private void cancelSearch(){
+        if (bluetoothAdapter.isDiscovering())
+            bluetoothAdapter.cancelDiscovery();
         ivSearch.setVisibility(View.GONE);
         tvSearch.setText("我的设备");
         llyCancelBack.setVisibility(View.GONE);
         tvAddDevice.setVisibility(View.VISIBLE);
+    }
+
+    private void searchComplete(){
+        showToast("搜索完成");
+        ivSearch.setVisibility(View.GONE);
+        tvSearch.setText("我的设备");
+        llyNoDevice.setVisibility(CommonUtils.isEmpty(deviceList)?View.VISIBLE:View.GONE);
+        lvDevice.setVisibility(CommonUtils.isEmpty(deviceList)?View.GONE:View.VISIBLE);
     }
 
     private void checkDevice() {
@@ -403,8 +262,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.tv_openBluetooth:  // 打开蓝牙
-                Intent intent =  new Intent(Settings.ACTION_BLUETOOTH_SETTINGS);
-                startActivity(intent);
+                bluetoothAdapter.enable();
                 break;
             case R.id.tv_addDevice:  //  添加设备
                 searchDevice();
@@ -423,7 +281,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @Override
     protected void onResume() {
         super.onResume();
-        checkBluetooth();//检测蓝牙是否开启
+        checkBluetooth();
     }
 
     @Override
@@ -435,28 +293,22 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (blueManager != null) {
-            blueManager.close();
-            blueManager = null;
-        }
-        if (handler != null) {
-            handler.removeCallbacksAndMessages(null);
-            handler = null;
-        }
-
     }
 
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == 2) {
-            if (permissions[0].equals(Manifest.permission.ACCESS_COARSE_LOCATION) && grantResults[0]
-                    == PackageManager.PERMISSION_GRANTED) {
-            } else {
-                if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.
-                        permission.ACCESS_COARSE_LOCATION)) {
-                    return;
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.e(getPackageName(), "开启权限permission granted!");
+                    search();
+                } else {
+                    showToast("没有定位权限，请先开启!");
+                    Log.e(getPackageName(), "没有定位权限，请先开启!");
                 }
             }
         }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override
@@ -502,16 +354,58 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 }, R.string.dialog_negative, null);
     }
 
-    private void getSn(){
-        MessageBean item = new MessageBean(TypeConversion.getDeviceVersion());
-        blueManager.setReadVersion(true);
-        blueManager.sendMessage(item, true);
+    private void bondDevice(int i) {
+        try {
+            Method method = BluetoothDevice.class.getMethod("createBond");
+            Log.e(getPackageName(), "开始配对");
+            method.invoke(deviceList.get(i));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    private void send(){
-        blueManager.setReadVersion(false);
-        MessageBean item = new MessageBean(TypeConversion.startDetect());
-        blueManager.sendMessage(item, true);
+    class BluetoothReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction() == null){
+                return;
+            }
+            if (intent.getAction().equals(BluetoothDevice.ACTION_FOUND)) {
+                Log.e(getPackageName(), "找到新设备了");
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                boolean addFlag = true;
+                for (BluetoothDevice bluetoothDevice : deviceList) {
+                    if (device.getAddress().equals(bluetoothDevice.getAddress())) {
+                        addFlag = false;
+                    }
+                }
+
+                if (addFlag) {
+                    deviceList.add(device);
+                    deviceAdapter.notifyDataSetChanged();
+                }
+            } else if (intent.getAction().equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)) {
+                searchComplete();
+            }else if (intent.getAction().equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                switch (device.getBondState()) {
+                    case BluetoothDevice.BOND_NONE:
+                        Log.e(getPackageName(), "取消配对");
+                        break;
+                    case BluetoothDevice.BOND_BONDING:
+                        Log.e(getPackageName(), "配对中");
+                        break;
+                    case BluetoothDevice.BOND_BONDED:
+                        Log.e(getPackageName(), "配对成功");
+                        break;
+                }
+
+
+            }
+        }
     }
+
+
 
 }

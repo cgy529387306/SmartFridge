@@ -1,1 +1,1 @@
-include ':app',':bluetools'
+include ':app'
