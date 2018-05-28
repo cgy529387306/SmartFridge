@@ -68,6 +68,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private String[] text = new String[]{"关于我们","线上商城","修改密码","退出登录"};
     private BluetoothAdapter bluetoothAdapter;
     private List<BluetoothDevice> deviceList;
+    private BluetoothReceiver bluetoothReceiver;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -172,11 +173,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      * 初始化蓝牙管理，设置监听
      */
     public void initBlueManager() {
+        bluetoothReceiver = new BluetoothReceiver();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
         intentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        registerReceiver(new BluetoothReceiver(), intentFilter);
+        registerReceiver(bluetoothReceiver, intentFilter);
     }
 
 
@@ -283,6 +285,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (bluetoothAdapter != null) {
+            bluetoothAdapter.cancelDiscovery();
+        }
+        this.unregisterReceiver(bluetoothReceiver);
     }
 
     @Override
@@ -384,6 +390,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 switch (device.getBondState()) {
                     case BluetoothDevice.BOND_NONE:
                         Log.e(getPackageName(), "取消配对");
+                        updateDeviceState(device);
                         break;
                     case BluetoothDevice.BOND_BONDING:
                         Log.e(getPackageName(), "配对中");
