@@ -2,49 +2,49 @@ package com.mb.smartfridge.activity;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothServerSocket;
-import android.bluetooth.BluetoothSocket;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.Settings;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.clj.fastble.BleManager;
+import com.clj.fastble.callback.BleNotifyCallback;
+import com.clj.fastble.callback.BleReadCallback;
+import com.clj.fastble.callback.BleWriteCallback;
+import com.clj.fastble.data.BleDevice;
+import com.clj.fastble.exception.BleException;
+import com.clj.fastble.utils.HexUtil;
 import com.mb.smartfridge.R;
+import com.mb.smartfridge.observer.Observer;
+import com.mb.smartfridge.observer.ObserverManager;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.UUID;
 
 /**
  * Created by cgy on 2018/4/19 0019.
  */
 
-public class SmartFridgeActivity extends BaseActivity implements View.OnClickListener{
+public class SmartFridgeActivity extends BaseActivity implements View.OnClickListener ,Observer {
 
-    private BluetoothDevice bluetoothDevice;
-    private UUID uuid = UUID.fromString("00001106-0000-1000-8000-00805F9B34FB");//服务端和客户端统一
+    private BleDevice bleDevice;
+    private BluetoothGattService bluetoothGattService;
+    private BluetoothGattCharacteristic characteristic;
     private TextView tvCurrentTemp,tvSetTemp;
     private ImageView ivBatteryState,ivEnergyState;
     private TextView tvBatteryState,tvEnergyState;
     private TextView tvBatteryVoltage,tvBatteryQuantity;
     private BluetoothAdapter bluetoothAdapter;
-    private BluetoothReceiver bluetoothReceiver;
     private final Timer timer = new Timer();
     private TimerTask task;
+    private boolean isRequestSuccess;
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         @Override
@@ -55,7 +55,9 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
                     Toast.makeText(SmartFridgeActivity.this, "发送成功", Toast.LENGTH_SHORT).show();
                     break;
                 case 2:
-                    getMessage();
+                    if (isRequestSuccess){
+                        getMessage();
+                    }
                     break;
                 case 3:
                     String data = (String) msg.obj;
@@ -68,12 +70,15 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_smartfridge);
-        bluetoothDevice = getIntent().getParcelableExtra("device");
+        bleDevice = getIntent().getParcelableExtra("device");
+        if (bleDevice == null)
+            finish();
+        ObserverManager.getInstance().addObserver(this);
         setTitle("车载冰箱");
         initView();
         initListener();
-        initBlueManager();
         initTask();
+        initBlueManager();
     }
 
     private void setTitle(String title) {
@@ -118,66 +123,141 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
         timer.schedule(task, 1000, 2000);
     }
 
-    /**
-     * 初始化蓝牙管理，设置监听
-     */
+
     public void initBlueManager() {
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        bluetoothReceiver = new BluetoothReceiver();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        registerReceiver(bluetoothReceiver, intentFilter);
+        BluetoothGatt gatt = BleManager.getInstance().getBluetoothGatt(bleDevice);
+        if (gatt != null){
+            for (BluetoothGattService gattService :gatt.getServices()) {
+                List<BluetoothGattCharacteristic> gattCharacteristics = gattService.getCharacteristics();
+                for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
+                    int charaProp = gattCharacteristic.getProperties();
+                    if (((charaProp & BluetoothGattCharacteristic.PROPERTY_READ) > 0) && ((charaProp & BluetoothGattCharacteristic.PROPERTY_WRITE) > 0)
+                            && ((charaProp & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0)) {
+                        characteristic = gattCharacteristic;
+                        sendMessage("AAC0F000000000000000000000005B");
+                        openNotify();
+                        return;
+                    }
+                }
+            }
+        }else{
+            finish();
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         timer.cancel();
-        this.unregisterReceiver(bluetoothReceiver);
+        BleManager.getInstance().clearCharacterCallback(bleDevice);
+        ObserverManager.getInstance().deleteObserver(this);
     }
 
-    private void sendMessage(final String msg) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                OutputStream os = null;
-                try {
-                    BluetoothSocket socket = bluetoothDevice.createRfcommSocketToServiceRecord(uuid);
-                    socket.connect();
-                    os = socket.getOutputStream();
-                    os.write(msg.getBytes());
-                    os.flush();
-                    handler.sendEmptyMessage(1);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+
+    private void sendMessage(final String hex) {
+        if (characteristic==null)
+            return;
+        BleManager.getInstance().write(
+                bleDevice,
+                characteristic.getService().getUuid().toString(),
+                characteristic.getUuid().toString(),
+                HexUtil.hexStringToBytes(hex),
+                new BleWriteCallback() {
+
+                    @Override
+                    public void onWriteSuccess(final int current, final int total, final byte[] justWrite) {
+                        isRequestSuccess = true;
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                showToast( "write success, current: " + current
+                                        + " total: " + total
+                                        + " justWrite: " + HexUtil.formatHexString(justWrite, true));
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onWriteFailure(final BleException exception) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                showToast(exception.toString());
+                            }
+                        });
+                    }
+                });
     }
 
     private void getMessage() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                InputStream is = null;
-                try {
-                    BluetoothServerSocket serverSocket = bluetoothAdapter.listenUsingRfcommWithServiceRecord("serverSocket", uuid);
-                    handler.sendEmptyMessage(3);
-                    BluetoothSocket accept = serverSocket.accept();
-                    is = accept.getInputStream();
+        if (characteristic==null)
+            return;
+        BleManager.getInstance().read(
+                bleDevice,
+                characteristic.getService().getUuid().toString(),
+                characteristic.getUuid().toString(),
+                new BleReadCallback() {
 
-                    byte[] bytes = new byte[1024];
-                    int length = is.read(bytes);
-                    Message msg = new Message();
-                    msg.what = 3;
-                    msg.obj = new String(bytes, 0, length);
-                    handler.sendMessage(msg);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+                    @Override
+                    public void onReadSuccess(final byte[] data) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                showToast( HexUtil.formatHexString(data, true));
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onReadFailure(final BleException exception) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                showToast( exception.toString());
+                            }
+                        });
+                    }
+                });
+    }
+
+    private void openNotify(){
+        if (characteristic==null)
+            return;
+        BleManager.getInstance().notify(
+                bleDevice,
+                characteristic.getService().getUuid().toString(),
+                characteristic.getUuid().toString(),
+                new BleNotifyCallback() {
+
+                    @Override
+                    public void onNotifySuccess() {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onNotifyFailure(final BleException exception) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                showToast( exception.toString());
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onCharacteristicChanged(byte[] data) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                showToast(HexUtil.formatHexString(characteristic.getValue(), true));
+                            }
+                        });
+                    }
+                });
     }
 
 
@@ -193,58 +273,10 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
         }
     }
 
-    class BluetoothReceiver extends BroadcastReceiver {
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction() == null){
-                return;
-            }
-            if (intent.getAction().equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                switch (device.getBondState()) {
-                    case BluetoothDevice.BOND_BONDING:
-                        Log.d("BlueToothTestActivity", "正在配对......");
-                        break;
-                    case BluetoothDevice.BOND_BONDED:
-                        Log.d("BlueToothTestActivity", "完成配对");
-                        break;
-                    case BluetoothDevice.BOND_NONE:
-                        Log.d("BlueToothTestActivity", "取消配对");
-                        bondDevice();
-                    default:
-                        break;
-                }
-            }else if (intent.getAction().equals(BluetoothAdapter.ACTION_STATE_CHANGED)){
-                int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
-                switch (state) {
-                    case BluetoothAdapter.STATE_TURNING_ON:
-                        Log.i("TAG", "BluetoothAdapter is turning on.");
-                        break;
-                    case BluetoothAdapter.STATE_ON:
-                        Log.i("TAG", "BluetoothAdapter is on.");
-                        break;
-                    case BluetoothAdapter.STATE_TURNING_OFF:
-                        Log.i("TAG", "BluetoothAdapter is turning off.");
-                        break;
-                    case BluetoothAdapter.STATE_OFF:
-                        Log.i("TAG", "BluetoothAdapter is off.");
-                        showToast("蓝牙已经关闭，请重新打开");
-                        Intent openIntent =  new Intent(Settings.ACTION_BLUETOOTH_SETTINGS);
-                        startActivity(openIntent);
-                        break;
-                }
-            }
-        }
-    }
-
-    private void bondDevice() {
-        try {
-            Method method = BluetoothDevice.class.getMethod("createBond");
-            Log.e(getPackageName(), "开始配对");
-            method.invoke(bluetoothDevice);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    @Override
+    public void disConnected(BleDevice bleDevice) {
+        showToast("连接已断开");
+        finish();
     }
 }

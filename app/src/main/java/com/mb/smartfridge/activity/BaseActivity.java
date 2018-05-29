@@ -3,6 +3,7 @@ package com.mb.smartfridge.activity;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Window;
 import android.view.WindowManager;
@@ -77,6 +78,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     public void showToast(String text){
+        Log.d("toast",text);
         ToastHelper.showToast(text);
     }
 }

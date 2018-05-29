@@ -2,12 +2,9 @@ package com.mb.smartfridge.activity;
 
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
-import android.content.Context;
+import android.bluetooth.BluetoothGatt;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Build;
@@ -17,7 +14,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -30,6 +26,11 @@ import android.widget.TextView;
 
 import com.avos.avoscloud.AVUser;
 import com.chad.library.adapter.base.BaseQuickAdapter;
+import com.clj.fastble.BleManager;
+import com.clj.fastble.callback.BleGattCallback;
+import com.clj.fastble.callback.BleScanCallback;
+import com.clj.fastble.data.BleDevice;
+import com.clj.fastble.exception.BleException;
 import com.mb.smartfridge.R;
 import com.mb.smartfridge.adapter.DeviceAdapter;
 import com.mb.smartfridge.adapter.DrawerLayoutAdapter;
@@ -37,16 +38,15 @@ import com.mb.smartfridge.entity.DrawerlayoutEntity;
 import com.mb.smartfridge.utils.CommonUtils;
 import com.mb.smartfridge.utils.DialogHelper;
 import com.mb.smartfridge.utils.NavigationHelper;
+import com.mb.smartfridge.utils.ProgressDialogHelper;
 import com.mb.smartfridge.utils.ToastHelper;
 import com.mb.smartfridge.views.DividerItemDecoration;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener {
     private static final int REQUEST_PERMISSION_ACCESS_LOCATION = 1;
-
     private ListView lvDrawerlayout;
     private RecyclerView lvDevice;
     private DrawerLayout drawerLayout;
@@ -67,8 +67,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private int img[] = new int[]{R.mipmap.ic_about,R.mipmap.ic_store,R.mipmap.ic_edit_password,R.mipmap.ic_logout};
     private String[] text = new String[]{"关于我们","线上商城","修改密码","退出登录"};
     private BluetoothAdapter bluetoothAdapter;
-    private List<BluetoothDevice> deviceList;
-    private BluetoothReceiver bluetoothReceiver;
+    private List<BleDevice> deviceList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -131,14 +130,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         deviceAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int i) {
-                if (bluetoothAdapter.isDiscovering())
-                    bluetoothAdapter.cancelDiscovery();
-                if (deviceList.get(i).getBondState() == BluetoothDevice.BOND_NONE) {
-                    bondDevice(i);
-                } else if (deviceList.get(i).getBondState() == BluetoothDevice.BOND_BONDED) {
+                BleDevice bleDevice = deviceList.get(i);
+                if (BleManager.getInstance().isConnected(bleDevice)) {
                     Bundle bundle = new Bundle();
                     bundle.putParcelable("device",deviceList.get(i));
                     NavigationHelper.startActivity(MainActivity.this,SmartFridgeActivity.class,bundle,false);
+                }else {
+                    BleManager.getInstance().cancelScan();
+                    connectDevice(bleDevice);
                 }
             }
         });
@@ -173,12 +172,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      * 初始化蓝牙管理，设置监听
      */
     public void initBlueManager() {
-        bluetoothReceiver = new BluetoothReceiver();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
-        intentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        registerReceiver(bluetoothReceiver, intentFilter);
+        BleManager.getInstance().init(getApplication());
+        BleManager.getInstance()
+                .enableLog(true)
+                .setReConnectCount(1, 5000)
+                .setConnectOverTime(20000)
+                .setOperateTimeout(5000);
     }
 
 
@@ -195,12 +194,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     private void searchDevice(){
-        ivSearch.setVisibility(View.VISIBLE);
-        tvSearch.setText("搜索可用设备");
-        llyCancelBack.setVisibility(View.VISIBLE);
-        tvAddDevice.setVisibility(View.GONE);
-        AnimationDrawable anim = (AnimationDrawable) ivSearch.getBackground();
-        anim.start();
         requestPermission();
     }
 
@@ -214,20 +207,54 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 return;
             }
             Log.e(getPackageName(), "已有定位权限");
-            search();
+            startScan();
         }
     }
 
-    public void search() {
-        if (bluetoothAdapter.isDiscovering())
-            bluetoothAdapter.cancelDiscovery();
-        bluetoothAdapter.startDiscovery();
-        Log.e(getPackageName(), "开始搜索");
+    private void startScan() {
+        BleManager.getInstance().scan(new BleScanCallback() {
+            @Override
+            public void onScanStarted(boolean success) {
+                ivSearch.setVisibility(View.VISIBLE);
+                tvSearch.setText("搜索可用设备");
+                llyCancelBack.setVisibility(View.VISIBLE);
+                tvAddDevice.setVisibility(View.GONE);
+                AnimationDrawable anim = (AnimationDrawable) ivSearch.getBackground();
+                anim.start();
+            }
+
+            @Override
+            public void onLeScan(BleDevice bleDevice) {
+                super.onLeScan(bleDevice);
+            }
+
+            @Override
+            public void onScanning(BleDevice bleDevice) {
+                boolean addFlag = true;
+                for (int i=0;i<deviceList.size();i++) {
+                    BleDevice bluetoothDevice = deviceList.get(i);
+                    if (bleDevice.getKey().equals(bluetoothDevice.getKey())) {
+                        addFlag = false;
+                        deviceList.set(i,bleDevice);
+                    }
+                }
+                if (addFlag) {
+                    deviceList.add(bleDevice);
+                    connectDevice(bleDevice);
+                }
+                deviceAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onScanFinished(List<BleDevice> scanResultList) {
+                searchComplete();
+            }
+        });
     }
 
+
     private void cancelSearch(){
-        if (bluetoothAdapter.isDiscovering())
-            bluetoothAdapter.cancelDiscovery();
+        BleManager.getInstance().cancelScan();
         ivSearch.setVisibility(View.GONE);
         tvSearch.setText("我的设备");
         llyCancelBack.setVisibility(View.GONE);
@@ -240,6 +267,46 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         tvSearch.setText("我的设备");
         llyNoDevice.setVisibility(CommonUtils.isEmpty(deviceList)?View.VISIBLE:View.GONE);
         lvDevice.setVisibility(CommonUtils.isEmpty(deviceList)?View.GONE:View.VISIBLE);
+    }
+
+    private void connectDevice(final BleDevice bleDevice) {
+        BleManager.getInstance().connect(bleDevice, new BleGattCallback() {
+            @Override
+            public void onStartConnect() {
+                ProgressDialogHelper.showProgressDialog(MainActivity.this,"连接中...");
+            }
+
+            @Override
+            public void onConnectFail(BleDevice bleDevice, BleException exception) {
+                ProgressDialogHelper.dismissProgressDialog();
+                showToast("连接失败");
+            }
+
+            @Override
+            public void onConnectSuccess(BleDevice bleDevice, BluetoothGatt gatt, int status) {
+                setBleDevice(bleDevice);
+                deviceAdapter.notifyDataSetChanged();
+                ProgressDialogHelper.dismissProgressDialog();
+                showToast("连接成功");
+            }
+
+            @Override
+            public void onDisConnected(boolean isActiveDisConnected, BleDevice bleDevice, BluetoothGatt gatt, int status) {
+                deviceList.remove(bleDevice);
+                deviceAdapter.notifyDataSetChanged();
+                ProgressDialogHelper.dismissProgressDialog();
+                showToast("取消连接成功");
+            }
+        });
+    }
+
+    private void setBleDevice(BleDevice bleDevice){
+        for (int i=0; i<deviceList.size();i++){
+            BleDevice device = deviceList.get(i);
+            if (bleDevice.getKey().equals(device.getKey())){
+                deviceList.set(i,bleDevice);
+            }
+        }
     }
 
 
@@ -285,27 +352,27 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (bluetoothAdapter != null) {
-            bluetoothAdapter.cancelDiscovery();
-        }
-        this.unregisterReceiver(bluetoothReceiver);
+        BleManager.getInstance().disconnectAllDevice();
+        BleManager.getInstance().destroy();
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
-            case 1: {
+            case REQUEST_PERMISSION_ACCESS_LOCATION: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Log.e(getPackageName(), "开启权限permission granted!");
-                    search();
+                    startScan();
                 } else {
                     showToast("没有定位权限，请先开启!");
                     Log.e(getPackageName(), "没有定位权限，请先开启!");
                 }
             }
+            break;
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
+
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -350,74 +417,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 }, R.string.dialog_negative, null);
     }
 
-    private void bondDevice(int i) {
-        try {
-            Method method = BluetoothDevice.class.getMethod("createBond");
-            Log.e(getPackageName(), "开始配对");
-            method.invoke(deviceList.get(i));
-            ToastHelper.showToast("请求配对,请稍等...");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
-    class BluetoothReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction() == null){
-                return;
-            }
-            if (intent.getAction().equals(BluetoothDevice.ACTION_FOUND)) {
-                Log.e(getPackageName(), "找到新设备了");
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                boolean addFlag = true;
-                for (int i=0;i<deviceList.size();i++) {
-                    BluetoothDevice bluetoothDevice = deviceList.get(i);
-                    if (device.getAddress().equals(bluetoothDevice.getAddress())) {
-                        addFlag = false;
-                        deviceList.set(i,device);
-                    }
-                }
-                if (addFlag) {
-                    deviceList.add(device);
-                }
-                deviceAdapter.notifyDataSetChanged();
-            } else if (intent.getAction().equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)) {
-                searchComplete();
-            }else if (intent.getAction().equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                switch (device.getBondState()) {
-                    case BluetoothDevice.BOND_NONE:
-                        Log.e(getPackageName(), "取消配对");
-                        updateDeviceState(device);
-                        break;
-                    case BluetoothDevice.BOND_BONDING:
-                        Log.e(getPackageName(), "配对中");
-                        break;
-                    case BluetoothDevice.BOND_BONDED:
-                        Log.e(getPackageName(), "配对成功");
-                        showToast("配对成功");
-                        updateDeviceState(device);
-                        break;
-                }
-
-
-            }
-        }
-    }
-
-
-    private void updateDeviceState(BluetoothDevice device){
-        if (device!=null && CommonUtils.isNotEmpty(deviceList)){
-            for (int i=0;i<deviceList.size();i++){
-                BluetoothDevice bluetoothDevice = deviceList.get(i);
-                if (!TextUtils.isEmpty(bluetoothDevice.getAddress()) && bluetoothDevice.getAddress().equals(device.getAddress())){
-                    deviceList.set(i,device);
-                    deviceAdapter.notifyDataSetChanged();
-                }
-            }
-        }
-    }
 
 }
