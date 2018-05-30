@@ -8,6 +8,8 @@ import android.bluetooth.BluetoothGattService;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -15,7 +17,6 @@ import android.widget.Toast;
 
 import com.clj.fastble.BleManager;
 import com.clj.fastble.callback.BleNotifyCallback;
-import com.clj.fastble.callback.BleReadCallback;
 import com.clj.fastble.callback.BleWriteCallback;
 import com.clj.fastble.data.BleDevice;
 import com.clj.fastble.exception.BleException;
@@ -23,6 +24,8 @@ import com.clj.fastble.utils.HexUtil;
 import com.mb.smartfridge.R;
 import com.mb.smartfridge.observer.Observer;
 import com.mb.smartfridge.observer.ObserverManager;
+import com.mb.smartfridge.utils.OrderHelper;
+import com.mb.smartfridge.utils.ProjectHelper;
 
 import java.util.List;
 import java.util.Timer;
@@ -35,7 +38,6 @@ import java.util.TimerTask;
 public class SmartFridgeActivity extends BaseActivity implements View.OnClickListener ,Observer {
 
     private BleDevice bleDevice;
-    private BluetoothGattService bluetoothGattService;
     private BluetoothGattCharacteristic characteristic;
     private TextView tvCurrentTemp,tvSetTemp;
     private ImageView ivBatteryState,ivEnergyState;
@@ -44,7 +46,15 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
     private BluetoothAdapter bluetoothAdapter;
     private final Timer timer = new Timer();
     private TimerTask task;
-    private boolean isRequestSuccess;
+    private static final String getDataOrder = "AAC0F000000000000000000000005B";
+    private static final String powerOffOrder = "AAC0F101000000000000000000005D";
+    private String currentTemp,setTemp;
+    private String tempUnit;
+    private String batteryState,energyState;
+    private String highV,lowV;
+    private String onOff;
+    private String curveTemp;
+    private String errorCode;
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         @Override
@@ -55,9 +65,7 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
                     Toast.makeText(SmartFridgeActivity.this, "发送成功", Toast.LENGTH_SHORT).show();
                     break;
                 case 2:
-                    if (isRequestSuccess){
-                        getMessage();
-                    }
+                    sendMessages(getDataOrder);
                     break;
                 case 3:
                     String data = (String) msg.obj;
@@ -131,10 +139,8 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
                 List<BluetoothGattCharacteristic> gattCharacteristics = gattService.getCharacteristics();
                 for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
                     int charaProp = gattCharacteristic.getProperties();
-                    if (((charaProp & BluetoothGattCharacteristic.PROPERTY_READ) > 0) && ((charaProp & BluetoothGattCharacteristic.PROPERTY_WRITE) > 0)
-                            && ((charaProp & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0)) {
+                    if (((charaProp & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0)) {
                         characteristic = gattCharacteristic;
-                        sendMessage("AAC0F000000000000000000000005B");
                         openNotify();
                         return;
                     }
@@ -154,7 +160,7 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
     }
 
 
-    private void sendMessage(final String hex) {
+    private void sendMessages(final String hex) {
         if (characteristic==null)
             return;
         BleManager.getInstance().write(
@@ -166,13 +172,9 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
 
                     @Override
                     public void onWriteSuccess(final int current, final int total, final byte[] justWrite) {
-                        isRequestSuccess = true;
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                showToast( "write success, current: " + current
-                                        + " total: " + total
-                                        + " justWrite: " + HexUtil.formatHexString(justWrite, true));
                             }
                         });
                     }
@@ -183,37 +185,6 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
                             @Override
                             public void run() {
                                 showToast(exception.toString());
-                            }
-                        });
-                    }
-                });
-    }
-
-    private void getMessage() {
-        if (characteristic==null)
-            return;
-        BleManager.getInstance().read(
-                bleDevice,
-                characteristic.getService().getUuid().toString(),
-                characteristic.getUuid().toString(),
-                new BleReadCallback() {
-
-                    @Override
-                    public void onReadSuccess(final byte[] data) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                showToast( HexUtil.formatHexString(data, true));
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onReadFailure(final BleException exception) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                showToast( exception.toString());
                             }
                         });
                     }
@@ -253,7 +224,7 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                showToast(HexUtil.formatHexString(characteristic.getValue(), true));
+                                updateView(HexUtil.formatHexString(characteristic.getValue(), true));
                             }
                         });
                     }
@@ -261,15 +232,87 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
     }
 
 
+    /**
+     *
+     *【通讯头】【客户码】【指令码】【开关机值】【实时温度值】【曲线温度值】【设置温度值】【模式值】
+     0xAA     0xC0    0xF2      0/1       -40~50      -40~50    20~-22       0/1
+     【温度单位值】【电池档位值】【错误值】【电池电压值高位】【电池电压值低位】【默认值】
+     0/1          0/1/2      1~6         12               26          0x00
+     【效验码】
+     * @param data
+     */
+    @SuppressLint("DefaultLocale")
+    private void updateView(String data){
+        Log.d("data",data);
+        if (!TextUtils.isEmpty(data)){
+            String[] dataList = data.split(" ");
+            if (dataList.length==15){
+                onOff = dataList[3];
+                currentTemp = dataList[4];
+                curveTemp = dataList[5];
+                setTemp = dataList[6];
+                energyState = dataList[7];
+                tempUnit = dataList[8];
+                batteryState = dataList[9];
+                errorCode = dataList[10];
+                highV = dataList[11];
+                lowV = dataList[12];
+                tvCurrentTemp.setText(String.format("%1s%2s",Integer.parseInt(currentTemp,16), Integer.parseInt(tempUnit,16)==1?"℉":"℃"));
+                tvSetTemp.setText(String.format("设置温度：%1s%2s", Integer.parseInt(setTemp,16),Integer.parseInt(tempUnit,16)==1?"℉":"℃"));
+                setEnergyState(Integer.parseInt(energyState,16));
+                setBatteryState(Integer.parseInt(batteryState,16));
+                tvBatteryVoltage.setText(String.format("电池电压：%d.%d", Integer.parseInt(highV, 16), Integer.parseInt(lowV, 16)));
+            }
+        }
+    }
+
+    private String getMessage(){
+        String msg = "AAC0F101"+onOff+currentTemp+curveTemp+setTemp+energyState+tempUnit+batteryState+errorCode+highV+lowV;
+        String validCode = OrderHelper.makeChecksum(msg);
+        return msg+validCode;
+    }
+
+    /**
+     * @param state 强劲为0x00，节能为0x01
+     */
+    private void setEnergyState(int state){
+        ivEnergyState.setImageResource(state==1?R.mipmap.ic_energy_saving:R.mipmap.ic_energy_strength);
+        tvEnergyState.setText(state==1?"节能":"强劲");
+    }
+
+    /**
+     * @param state 0为低档，1为中档，2为高档
+     */
+    private void setBatteryState(int state){
+        if (state==1){
+            ivBatteryState.setImageResource(R.mipmap.ic_battery_middle);
+            tvBatteryState.setText("中");
+        }else if (state==2){
+            ivBatteryState.setImageResource(R.mipmap.ic_battery_hi);
+            tvBatteryState.setText("高");
+        }else{
+            ivBatteryState.setImageResource(R.mipmap.ic_battery_low);
+            tvBatteryState.setText("低");
+        }
+    }
+
+
     @Override
     public void onClick(View view) {
+        ProjectHelper.disableViewDoubleClick(view);
         int id = view.getId();
         if (id == R.id.iv_minus){
-            //TODO
+            if (TextUtils.isEmpty(setTemp)){
+                setTemp = String.valueOf(Integer.parseInt(setTemp,16)-1);
+            }
+            sendMessages(getMessage());
         }else if (id == R.id.iv_plus){
-            //TODO
+            if (TextUtils.isEmpty(setTemp)){
+                setTemp = String.valueOf(Integer.parseInt(setTemp,16)+1);
+            }
+            sendMessages(getMessage());
         }else if (id == R.id.iv_power_off){
-           finish();
+            sendMessages(powerOffOrder);
         }
     }
 
@@ -279,4 +322,6 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
         showToast("连接已断开");
         finish();
     }
+
+
 }

@@ -37,7 +37,7 @@
             <TextView
                 android:id="@+id/tv_current_temperature"
                 android:layout_width="match_parent"
-                android:text="12℃"
+                android:text=""
                 android:gravity="center_horizontal"
                 android:textColor="@color/colorWhite"
                 android:textSize="@dimen/activity_text_size_large"
@@ -46,7 +46,7 @@
             <TextView
                 android:id="@+id/tv_set_temperature"
                 android:layout_width="match_parent"
-                android:text="设置温度;-16℃"
+                android:text="设置温度："
                 android:gravity="center_horizontal"
                 android:textColor="@color/colorWhite"
                 android:layout_marginTop="10dp"
@@ -169,7 +169,7 @@
             android:id="@+id/tv_battery_voltage"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:text="电池电压: 11.86"
+            android:text="电池电压： 11.86"
             android:textColor="@color/colorBounder"
             android:textSize="@dimen/activity_text_size_small"
             android:layout_height="wrap_content" />
@@ -177,7 +177,7 @@
             android:id="@+id/tv_battery_quantity"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:text="电池电量: 80%"
+            android:text="电池电量： 80%"
             android:textColor="@color/colorBounder"
             android:gravity="right"
             android:textSize="@dimen/activity_text_size_small"

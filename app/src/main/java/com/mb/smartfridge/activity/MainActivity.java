@@ -273,12 +273,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         BleManager.getInstance().connect(bleDevice, new BleGattCallback() {
             @Override
             public void onStartConnect() {
-                ProgressDialogHelper.showProgressDialog(MainActivity.this,"连接中...");
             }
 
             @Override
             public void onConnectFail(BleDevice bleDevice, BleException exception) {
-                ProgressDialogHelper.dismissProgressDialog();
                 showToast("连接失败");
             }
 
@@ -286,7 +284,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             public void onConnectSuccess(BleDevice bleDevice, BluetoothGatt gatt, int status) {
                 setBleDevice(bleDevice);
                 deviceAdapter.notifyDataSetChanged();
-                ProgressDialogHelper.dismissProgressDialog();
                 showToast("连接成功");
             }
 
