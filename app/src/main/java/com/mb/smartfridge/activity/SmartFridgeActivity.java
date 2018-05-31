@@ -1,7 +1,6 @@
 package com.mb.smartfridge.activity;
 
 import android.annotation.SuppressLint;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
@@ -43,18 +42,21 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
     private ImageView ivBatteryState,ivEnergyState;
     private TextView tvBatteryState,tvEnergyState;
     private TextView tvBatteryVoltage,tvBatteryQuantity;
-    private BluetoothAdapter bluetoothAdapter;
     private final Timer timer = new Timer();
     private TimerTask task;
     private static final String getDataOrder = "AAC0F000000000000000000000005B";
-    private static final String powerOffOrder = "AAC0F101000000000000000000005D";
+    private static final String powerOffOrder = "AAC0F100000000000000000000005C";
+    private static final String powerOnOrder = "AAC0F101000000000000000000005D";
+    private static final String energyStrongOrder = "AAC0F101000000000000000000025F";
+    private static final String energySaveOrder = "AAC0F1010000000100000000000260";
+    private static final String batteryHighOrder = "AAC0F1010000000000020000000463";
+    private static final String batteryMiddleOrder = "AAC0F1010000000000010000000462";
+    private static final String batteryLowerOrder = "AAC0F1010000000000000000000461";
     private String currentTemp,setTemp;
     private String tempUnit;
     private String batteryState,energyState;
     private String highV,lowV;
-    private String onOff;
-    private String curveTemp;
-    private String errorCode;
+    private boolean isOpen = true;
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         @Override
@@ -117,6 +119,8 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
         findViewById(R.id.iv_minus).setOnClickListener(this);
         findViewById(R.id.iv_plus).setOnClickListener(this);
         findViewById(R.id.iv_power_off).setOnClickListener(this);
+        findViewById(R.id.lin_energy).setOnClickListener(this);
+        findViewById(R.id.lin_battery).setOnClickListener(this);
     }
 
     private void initTask(){
@@ -184,7 +188,7 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                showToast(exception.toString());
+                                Log.d("myTag",TextUtils.isEmpty(exception.toString())?"":exception.toString());
                             }
                         });
                     }
@@ -214,7 +218,7 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                showToast( exception.toString());
+                                Log.d("myTag",TextUtils.isEmpty(exception.toString())?"":exception.toString());
                             }
                         });
                     }
@@ -247,29 +251,36 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
         if (!TextUtils.isEmpty(data)){
             String[] dataList = data.split(" ");
             if (dataList.length==15){
-                onOff = dataList[3];
+                isOpen = getHexResult(dataList[3])==1;
                 currentTemp = dataList[4];
-                curveTemp = dataList[5];
                 setTemp = dataList[6];
                 energyState = dataList[7];
                 tempUnit = dataList[8];
                 batteryState = dataList[9];
-                errorCode = dataList[10];
                 highV = dataList[11];
                 lowV = dataList[12];
                 tvCurrentTemp.setText(String.format("%1s%2s",getHexResult(currentTemp), getHexResult(tempUnit)==1?"℉":"℃"));
                 tvSetTemp.setText(String.format("设置温度：%1s%2s", getHexResult(setTemp),getHexResult(tempUnit)==1?"℉":"℃"));
                 setEnergyState(getHexResult(energyState));
                 setBatteryState(getHexResult(batteryState));
-                tvBatteryVoltage.setText(String.format("电池电压：%d.%d", getHexResult(highV), getHexResult(lowV)));
+                tvBatteryVoltage.setText(String.format("电池电压：%d.%d",Integer.parseInt(highV,16), Integer.parseInt(lowV,16)));
             }
         }
     }
 
-    private String getMessage(){
-        String msg = "AAC0F101"+onOff+currentTemp+curveTemp+setTemp+energyState+tempUnit+batteryState+errorCode+highV+lowV;
+    private void setTemperature(String tempHex){
+        String hex = "00";
+        if (TextUtils.isEmpty(tempHex)){
+            hex = "00";
+        }else if (tempHex.length()==1){
+            hex = "0"+tempHex;
+        }else if (tempHex.length()==2){
+            hex = tempHex;
+        }
+        String msg = "AAC0F1010000"+hex+"00000000000001";
         String validCode = OrderHelper.makeChecksum(msg);
-        return msg+validCode;
+        String order = msg+validCode;
+        sendMessages(order.toUpperCase());
     }
 
     private int getHexResult(String data){
@@ -301,7 +312,7 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
         }else if (state==2){
             ivBatteryState.setImageResource(R.mipmap.ic_battery_hi);
             tvBatteryState.setText("高");
-        }else{
+        }else if (state == 0){
             ivBatteryState.setImageResource(R.mipmap.ic_battery_low);
             tvBatteryState.setText("低");
         }
@@ -313,7 +324,7 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
         ProjectHelper.disableViewDoubleClick(view);
         int id = view.getId();
         if (id == R.id.iv_minus){
-            if (TextUtils.isEmpty(setTemp)){
+            if (!TextUtils.isEmpty(setTemp)){
                 int curTemp = getHexResult(setTemp);
                 curTemp = curTemp-1;
                 if (curTemp<0){
@@ -321,9 +332,9 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
                 }
                 setTemp = Integer.toHexString(curTemp);
             }
-            sendMessages(getMessage());
+            setTemperature(setTemp);
         }else if (id == R.id.iv_plus){
-            if (TextUtils.isEmpty(setTemp)){
+            if (!TextUtils.isEmpty(setTemp)){
                 int curTemp = getHexResult(setTemp);
                 curTemp = curTemp+1;
                 if (curTemp<0){
@@ -331,9 +342,22 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
                 }
                 setTemp = Integer.toHexString(curTemp);
             }
-            sendMessages(getMessage());
+            setTemperature(setTemp);
         }else if (id == R.id.iv_power_off){
-            sendMessages(powerOffOrder);
+            sendMessages(isOpen?powerOffOrder:powerOnOrder);
+        }else if (id == R.id.lin_energy){
+            int state = getHexResult(energyState);
+            sendMessages(state==1?energyStrongOrder:energySaveOrder);
+        }else if (id == R.id.lin_battery){
+            int state = getHexResult(batteryState);
+            if (state == 0){
+                sendMessages(batteryMiddleOrder);
+            }else if (state == 1){
+                sendMessages(batteryHighOrder);
+            }else if (state == 2){
+                sendMessages(batteryLowerOrder);
+            }
+
         }
     }
 

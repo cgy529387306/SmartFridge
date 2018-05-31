@@ -31,6 +31,7 @@ import com.clj.fastble.callback.BleGattCallback;
 import com.clj.fastble.callback.BleScanCallback;
 import com.clj.fastble.data.BleDevice;
 import com.clj.fastble.exception.BleException;
+import com.clj.fastble.scan.BleScanRuleConfig;
 import com.mb.smartfridge.R;
 import com.mb.smartfridge.adapter.DeviceAdapter;
 import com.mb.smartfridge.adapter.DrawerLayoutAdapter;
@@ -178,6 +179,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 .setReConnectCount(1, 5000)
                 .setConnectOverTime(20000)
                 .setOperateTimeout(5000);
+        BleScanRuleConfig scanRuleConfig = new BleScanRuleConfig.Builder()
+                .setDeviceName(true, "WaymanBleQX")   // 只扫描指定广播名的设备，可选
+                .setAutoConnect(true)      // 连接时的autoConnect参数，可选，默认false
+                .setScanTimeOut(10000)              // 扫描超时时间，可选，默认10秒
+                .build();
+        BleManager.getInstance().initScanRule(scanRuleConfig);
     }
 
 
@@ -262,7 +269,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     private void searchComplete(){
-        showToast("搜索完成");
+        Log.d("myTag","搜索完成");
         ivSearch.setVisibility(View.GONE);
         tvSearch.setText("我的设备");
         llyNoDevice.setVisibility(CommonUtils.isEmpty(deviceList)?View.VISIBLE:View.GONE);
@@ -277,14 +284,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
             @Override
             public void onConnectFail(BleDevice bleDevice, BleException exception) {
-                showToast("连接失败");
+                Log.d("myTag","连接失败");
             }
 
             @Override
             public void onConnectSuccess(BleDevice bleDevice, BluetoothGatt gatt, int status) {
                 setBleDevice(bleDevice);
                 deviceAdapter.notifyDataSetChanged();
-                showToast("连接成功");
+                Log.d("myTag","连接成功");
             }
 
             @Override
@@ -292,7 +299,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 deviceList.remove(bleDevice);
                 deviceAdapter.notifyDataSetChanged();
                 ProgressDialogHelper.dismissProgressDialog();
-                showToast("取消连接成功");
+                Log.d("myTag","取消连接成功");
             }
         });
     }

@@ -95,6 +95,7 @@
         android:layout_marginTop="30dp"
         android:orientation="horizontal">
         <LinearLayout
+            android:id="@+id/lin_energy"
             android:layout_width="100dp"
             android:layout_height="140dp"
             android:layout_margin="15dp"
@@ -123,6 +124,7 @@
                 android:textSize="16sp"/>
         </LinearLayout>
         <LinearLayout
+            android:id="@+id/lin_battery"
             android:layout_width="100dp"
             android:layout_height="140dp"
             android:layout_margin="15dp"
@@ -177,7 +179,7 @@
             android:id="@+id/tv_battery_quantity"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:text="电池电量： 80%"
+            android:text="电池电量： 100%"
             android:textColor="@color/colorBounder"
             android:gravity="right"
             android:textSize="@dimen/activity_text_size_small"
