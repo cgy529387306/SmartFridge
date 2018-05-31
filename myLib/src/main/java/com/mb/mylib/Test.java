@@ -2,8 +2,9 @@ package com.mb.mylib;
 
 public class Test {
     public static void main(String[] args) {
-//        int test = Integer.parseInt("fffd", 16);
-        System.out.println(makeChecksum("AAC0F10100000000000000000000"));
+        int test = Integer.parseInt("fd", 16);
+        System.out.println(test);
+//        System.out.println(makeChecksum("AAC0F10100000000000000000000"));
     }
 
     /**

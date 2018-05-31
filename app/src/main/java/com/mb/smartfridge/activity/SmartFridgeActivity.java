@@ -257,11 +257,11 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
                 errorCode = dataList[10];
                 highV = dataList[11];
                 lowV = dataList[12];
-                tvCurrentTemp.setText(String.format("%1s%2s",Integer.parseInt(currentTemp,16), Integer.parseInt(tempUnit,16)==1?"℉":"℃"));
-                tvSetTemp.setText(String.format("设置温度：%1s%2s", Integer.parseInt(setTemp,16),Integer.parseInt(tempUnit,16)==1?"℉":"℃"));
-                setEnergyState(Integer.parseInt(energyState,16));
-                setBatteryState(Integer.parseInt(batteryState,16));
-                tvBatteryVoltage.setText(String.format("电池电压：%d.%d", Integer.parseInt(highV, 16), Integer.parseInt(lowV, 16)));
+                tvCurrentTemp.setText(String.format("%1s%2s",getHexResult(currentTemp), getHexResult(tempUnit)==1?"℉":"℃"));
+                tvSetTemp.setText(String.format("设置温度：%1s%2s", getHexResult(setTemp),getHexResult(tempUnit)==1?"℉":"℃"));
+                setEnergyState(getHexResult(energyState));
+                setBatteryState(getHexResult(batteryState));
+                tvBatteryVoltage.setText(String.format("电池电压：%d.%d", getHexResult(highV), getHexResult(lowV)));
             }
         }
     }
@@ -270,6 +270,17 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
         String msg = "AAC0F101"+onOff+currentTemp+curveTemp+setTemp+energyState+tempUnit+batteryState+errorCode+highV+lowV;
         String validCode = OrderHelper.makeChecksum(msg);
         return msg+validCode;
+    }
+
+    private int getHexResult(String data){
+        int result = 0;
+        try {
+            int iData = Integer.parseInt(data,16);
+            result = iData>128?iData-256:iData;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+       return result;
     }
 
     /**
@@ -303,12 +314,22 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
         int id = view.getId();
         if (id == R.id.iv_minus){
             if (TextUtils.isEmpty(setTemp)){
-                setTemp = String.valueOf(Integer.parseInt(setTemp,16)-1);
+                int curTemp = getHexResult(setTemp);
+                curTemp = curTemp-1;
+                if (curTemp<0){
+                    curTemp = curTemp+256;
+                }
+                setTemp = Integer.toHexString(curTemp);
             }
             sendMessages(getMessage());
         }else if (id == R.id.iv_plus){
             if (TextUtils.isEmpty(setTemp)){
-                setTemp = String.valueOf(Integer.parseInt(setTemp,16)+1);
+                int curTemp = getHexResult(setTemp);
+                curTemp = curTemp+1;
+                if (curTemp<0){
+                    curTemp = curTemp+256;
+                }
+                setTemp = Integer.toHexString(curTemp);
             }
             sendMessages(getMessage());
         }else if (id == R.id.iv_power_off){
