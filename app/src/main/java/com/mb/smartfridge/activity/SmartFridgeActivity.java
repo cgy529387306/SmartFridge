@@ -44,14 +44,14 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
     private TextView tvBatteryVoltage,tvBatteryQuantity;
     private final Timer timer = new Timer();
     private TimerTask task;
-    private static final String getDataOrder = "AAC0F000000000000000000000005B";
-    private static final String powerOffOrder = "AAC0F100000000000000000000005C";
-    private static final String powerOnOrder = "AAC0F101000000000000000000005D";
-    private static final String energyStrongOrder = "AAC0F101000000000000000000025F";
-    private static final String energySaveOrder = "AAC0F1010000000100000000000260";
-    private static final String batteryHighOrder = "AAC0F1010000000000020000000463";
-    private static final String batteryMiddleOrder = "AAC0F1010000000000010000000462";
-    private static final String batteryLowerOrder = "AAC0F1010000000000000000000461";
+    private static final String getDataOrder = "AAC0F000000000000000000000005B";//获取数据指令
+    private static final String powerOffOrder = "AAC0F100000000000000000000005C";//关机指令
+    private static final String powerOnOrder = "AAC0F101000000000000000000005D";//开机指令
+    private static final String energyStrongOrder = "AAC0F101000000000000000000025F";//强劲模式指令
+    private static final String energySaveOrder = "AAC0F1010000000100000000000260";//技能模式指令
+    private static final String batteryHighOrder = "AAC0F1010000000000020000000463";//高档指令
+    private static final String batteryMiddleOrder = "AAC0F1010000000000010000000462";//中档指令
+    private static final String batteryLowerOrder = "AAC0F1010000000000000000000461";//抵挡指令
     private String currentTemp,setTemp;
     private String tempUnit;
     private String batteryState,energyState;
