@@ -36,7 +36,7 @@ public class SplashActivity extends Activity{
                 if (AVUser.getCurrentUser() != null) {
                     NavigationHelper.startActivity(SplashActivity.this,MainActivity.class,null,true);
                 }else{
-                    NavigationHelper.startActivity(SplashActivity.this,MainActivity.class,null,true);
+                    NavigationHelper.startActivity(SplashActivity.this,LoginActivity.class,null,true);
                 }
             }
         }, 1500);

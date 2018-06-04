@@ -152,7 +152,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                         NavigationHelper.startActivity(MainActivity.this,AboutUsActivity.class,null,false);
                         break;
                     case 1:
-                        NavigationHelper.startActivity(MainActivity.this,SmartFridgeActivity.class,null,false);
+                        NavigationHelper.openTM(MainActivity.this);
                         break;
                     case 2:
                         Bundle bundle = new Bundle();
