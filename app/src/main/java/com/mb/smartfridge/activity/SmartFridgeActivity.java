@@ -327,22 +327,31 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
             if (!TextUtils.isEmpty(setTemp)){
                 int curTemp = getHexResult(setTemp);
                 curTemp = curTemp-1;
-                if (curTemp<0){
-                    curTemp = curTemp+256;
+                if (curTemp<-25){
+                    showToast("设置温度不能低于-25℃");
+                }else{
+                    if (curTemp<0){
+                        curTemp = curTemp+256;
+                    }
+                    setTemp = Integer.toHexString(curTemp);
+                    setTemperature(setTemp);
                 }
-                setTemp = Integer.toHexString(curTemp);
             }
-            setTemperature(setTemp);
         }else if (id == R.id.iv_plus){
             if (!TextUtils.isEmpty(setTemp)){
                 int curTemp = getHexResult(setTemp);
                 curTemp = curTemp+1;
-                if (curTemp<0){
-                    curTemp = curTemp+256;
+                if (curTemp>20){
+                    showToast("设置温度不能高于20℃");
+                }else{
+                    if (curTemp<0){
+                        curTemp = curTemp+256;
+                    }
+                    setTemp = Integer.toHexString(curTemp);
+                    setTemperature(setTemp);
                 }
-                setTemp = Integer.toHexString(curTemp);
             }
-            setTemperature(setTemp);
+
         }else if (id == R.id.iv_power_off){
             sendMessages(isOpen?powerOffOrder:powerOnOrder);
         }else if (id == R.id.lin_energy){
