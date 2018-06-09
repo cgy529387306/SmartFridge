@@ -365,13 +365,6 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
                 }
             }
 
-        }else if (id == R.id.iv_power_off){
-                if (curTemp<0){
-                    curTemp = curTemp+256;
-                }
-                setTemp = Integer.toHexString(curTemp);
-            }
-            setTemperature(setTemp);
         }else if (id == R.id.iv_power){
             sendMessages(isOpen?powerOffOrder:powerOnOrder);
         }else if (id == R.id.lin_energy){
