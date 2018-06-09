@@ -52,11 +52,14 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
     private static final String batteryHighOrder = "AAC0F1010000000000020000000463";//高档指令
     private static final String batteryMiddleOrder = "AAC0F1010000000000010000000462";//中档指令
     private static final String batteryLowerOrder = "AAC0F1010000000000000000000461";//抵挡指令
+    private static final String tempC = "AAC0F100000000000000000000005C";//摄氏温度
+    private static final String tempF = "AAC0F101000000000000000000005D";//华氏温度
     private String currentTemp,setTemp;
     private String tempUnit;
     private String batteryState,energyState;
     private String highV,lowV;
     private boolean isOpen = true;
+    private ImageView ivPower;
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         @Override
@@ -84,7 +87,7 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
         if (bleDevice == null)
             finish();
         ObserverManager.getInstance().addObserver(this);
-        setTitle("车载冰箱");
+        setTitle("TAWA智能车载冰箱");
         initView();
         initListener();
         initTask();
@@ -105,6 +108,7 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
     }
 
     private void initView(){
+        ivPower = findViewById(R.id.iv_power);
         tvCurrentTemp = findViewById(R.id.tv_current_temperature);
         tvSetTemp = findViewById(R.id.tv_set_temperature);
         ivBatteryState = findViewById(R.id.iv_battery_state);
@@ -116,9 +120,9 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
     }
 
     private void initListener(){
+        ivPower.setOnClickListener(this);
         findViewById(R.id.iv_minus).setOnClickListener(this);
         findViewById(R.id.iv_plus).setOnClickListener(this);
-        findViewById(R.id.iv_power_off).setOnClickListener(this);
         findViewById(R.id.lin_energy).setOnClickListener(this);
         findViewById(R.id.lin_battery).setOnClickListener(this);
     }
@@ -259,10 +263,12 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
                 batteryState = dataList[9];
                 highV = dataList[11];
                 lowV = dataList[12];
+                ivPower.setImageResource(isOpen?R.mipmap.ic_power_on :R.mipmap.ic_power_off);
                 tvCurrentTemp.setText(String.format("%1s%2s",getHexResult(currentTemp), getHexResult(tempUnit)==1?"℉":"℃"));
                 tvSetTemp.setText(String.format("设置温度：%1s%2s", getHexResult(setTemp),getHexResult(tempUnit)==1?"℉":"℃"));
                 setEnergyState(getHexResult(energyState));
                 setBatteryState(getHexResult(batteryState));
+
                 tvBatteryVoltage.setText(String.format("电池电压：%d.%d",Integer.parseInt(highV,16), Integer.parseInt(lowV,16)));
             }
         }
@@ -343,7 +349,7 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
                 setTemp = Integer.toHexString(curTemp);
             }
             setTemperature(setTemp);
-        }else if (id == R.id.iv_power_off){
+        }else if (id == R.id.iv_power){
             sendMessages(isOpen?powerOffOrder:powerOnOrder);
         }else if (id == R.id.lin_energy){
             int state = getHexResult(energyState);

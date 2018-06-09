@@ -9,6 +9,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
         android:gravity="center"
         android:orientation="horizontal">
         <ImageView
@@ -28,8 +29,8 @@
             <TextView
                 android:layout_width="match_parent"
                 android:text="当前温度"
-                android:textColor="@color/colorWhite"
-                android:layout_marginTop="30dp"
+                android:textColor="@color/colorHintGray"
+                android:layout_marginTop="50dp"
                 android:gravity="center_horizontal"
                 android:textSize="@dimen/activity_text_size"
                 android:layout_height="wrap_content" />
@@ -37,10 +38,10 @@
             <TextView
                 android:id="@+id/tv_current_temperature"
                 android:layout_width="match_parent"
-                android:text=""
+                android:text="12℃"
                 android:gravity="center_horizontal"
                 android:textColor="@color/colorWhite"
-                android:textSize="@dimen/activity_text_size_large"
+                android:textSize="44sp"
                 android:layout_height="wrap_content" />
 
             <TextView
@@ -155,12 +156,12 @@
     </LinearLayout>
 
     <ImageView
-        android:id="@+id/iv_power_off"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/iv_power"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         android:layout_marginTop="30dp"
         android:layout_gravity="center"
-        android:src="@mipmap/ic_power_off"/>
+        android:src="@mipmap/ic_power_on"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
