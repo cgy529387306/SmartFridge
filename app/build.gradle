@@ -4,7 +4,7 @@ android {
     compileSdkVersion 26
     buildToolsVersion "26.0.2"
     defaultConfig {
-        multiDexEnabled true
+//        multiDexEnabled true
         applicationId "com.mb.smartfridge"
         minSdkVersion 18
         targetSdkVersion 26
@@ -12,9 +12,9 @@ android {
         versionName "1.0.0"
     }
 
-    dexOptions {
-        javaMaxHeapSize "4g"
-    }
+//    dexOptions {
+//        javaMaxHeapSize "4g"
+//    }
 
     lintOptions {
         abortOnError false

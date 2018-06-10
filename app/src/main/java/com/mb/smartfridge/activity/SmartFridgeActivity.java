@@ -176,6 +176,7 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
     private void sendMessages(final String hex) {
         if (characteristic==null)
             return;
+
         BleManager.getInstance().write(
                 bleDevice,
                 characteristic.getService().getUuid().toString(),
@@ -271,8 +272,8 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
                 ivPower.setImageResource(isOpen?R.mipmap.ic_power_on :R.mipmap.ic_power_off);
                 tvCurrentTemp.setText(String.format("%1s%2s",getHexResult(currentTemp), getHexResult(tempUnit)==1?"℉":"℃"));
                 tvSetTemp.setText(String.format("设置温度：%1s%2s", getHexResult(setTemp),getHexResult(tempUnit)==1?"℉":"℃"));
-                tvTempC.setTextColor(getHexResult(tempUnit)==1?getResources().getColor(R.color.colorGray):getResources().getColor(R.color.colorBounder));
                 tvTempC.setTextColor(getHexResult(tempUnit)==1?getResources().getColor(R.color.colorBounder):getResources().getColor(R.color.colorGray));
+                tvTempF.setTextColor(getHexResult(tempUnit)==1?getResources().getColor(R.color.colorGray):getResources().getColor(R.color.colorBounder));
                 setEnergyState(getHexResult(energyState));
                 setBatteryState(getHexResult(batteryState));
 
@@ -334,7 +335,6 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
 
     @Override
     public void onClick(View view) {
-        ProjectHelper.disableViewDoubleClick(view);
         int id = view.getId();
         if (id == R.id.iv_minus){
             if (!TextUtils.isEmpty(setTemp)){
@@ -346,8 +346,10 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
                     if (curTemp<0){
                         curTemp = curTemp+256;
                     }
+//                    tvCurrentTemp.setText(String.format("%1s%2s",String.valueOf(curTemp), getHexResult(tempUnit)==1?"℉":"℃"));
                     setTemp = Integer.toHexString(curTemp);
                     setTemperature(setTemp);
+
                 }
             }
         }else if (id == R.id.iv_plus){
@@ -360,6 +362,7 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
                     if (curTemp<0){
                         curTemp = curTemp+256;
                     }
+//                    tvCurrentTemp.setText(String.format("%1s%2s",String.valueOf(curTemp), getHexResult(tempUnit)==1?"℉":"℃"));
                     setTemp = Integer.toHexString(curTemp);
                     setTemperature(setTemp);
                 }
@@ -367,24 +370,30 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
 
         }else if (id == R.id.iv_power){
             sendMessages(isOpen?powerOffOrder:powerOnOrder);
+//            ivPower.setImageResource(isOpen?R.mipmap.ic_power_off :R.mipmap.ic_power_on);
         }else if (id == R.id.lin_energy){
             int state = getHexResult(energyState);
             sendMessages(state==1?energyStrongOrder:energySaveOrder);
+//            setEnergyState(state==1?0:1);
         }else if (id == R.id.lin_battery){
             int state = getHexResult(batteryState);
             if (state == 0){
                 sendMessages(batteryMiddleOrder);
+//                setBatteryState(1);
             }else if (state == 1){
                 sendMessages(batteryHighOrder);
+//                setBatteryState(2);
             }else if (state == 2){
                 sendMessages(batteryLowerOrder);
+//                setBatteryState(0);
             }
         }else if (id == R.id.tv_tempC){
-            if (getHexResult(tempUnit)!=1){
+            if (getHexResult(tempUnit)==1){
                 sendMessages(tempCOrder);
+
             }
         }else if (id == R.id.tv_tempF){
-            if (getHexResult(tempUnit)==1){
+            if (getHexResult(tempUnit)!=1){
                 sendMessages(tempFOrder);
             }
         }
