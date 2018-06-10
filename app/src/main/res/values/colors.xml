@@ -9,6 +9,7 @@
     <color name="black">#ff000000</color>
     <color name="transparent">#00000000</color>
     <color name="translucent">#88000000</color>
+    <color name="pressed">#33000000</color>
 
     <color name="colorBlack">#ff000000</color>
     <color name="colorWhite">#ffffff</color>

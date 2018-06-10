@@ -4,12 +4,11 @@
     android:layout_height="match_parent"
     android:background="@mipmap/img_background"
     android:orientation="vertical">
-
     <include layout="@layout/base_layout"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="25dp"
         android:gravity="center"
         android:orientation="horizontal">
         <ImageView
@@ -19,7 +18,6 @@
             android:layout_gravity="bottom"
             android:layout_marginRight="20dp"
             android:src="@mipmap/ic_minus"/>
-
         <LinearLayout
             android:layout_width="wrap_content"
             android:background="@mipmap/ic_temperature_circle"
@@ -95,16 +93,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="25dp"
         android:orientation="horizontal">
         <LinearLayout
             android:id="@+id/lin_energy"
             android:layout_width="100dp"
-            android:layout_height="140dp"
+            android:layout_height="135dp"
             android:layout_margin="15dp"
             android:gravity="center"
             android:orientation="vertical"
-            android:background="@drawable/shape_bounder">
+            android:background="@drawable/custom_bounder_btn">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -129,11 +127,11 @@
         <LinearLayout
             android:id="@+id/lin_battery"
             android:layout_width="100dp"
-            android:layout_height="140dp"
+            android:layout_height="135dp"
             android:layout_margin="15dp"
             android:gravity="center"
             android:orientation="vertical"
-            android:background="@drawable/shape_bounder">
+            android:background="@drawable/custom_bounder_btn">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -161,14 +159,18 @@
         android:id="@+id/iv_power"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="25dp"
         android:layout_gravity="center"
         android:src="@mipmap/ic_power_on"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_margin="15dp"
+        android:layout_margin="12dp"
         android:orientation="horizontal">
         <TextView
             android:id="@+id/tv_battery_voltage"
