@@ -8,8 +8,8 @@ android {
         applicationId "com.mb.smartfridge"
         minSdkVersion 18
         targetSdkVersion 26
-        versionCode 100
-        versionName "1.0.0"
+        versionCode 101
+        versionName "1.0.1"
     }
 
 //    dexOptions {

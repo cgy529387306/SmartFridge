@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.AnimationDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -24,7 +25,12 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.avos.avoscloud.AVException;
+import com.avos.avoscloud.AVObject;
+import com.avos.avoscloud.AVQuery;
 import com.avos.avoscloud.AVUser;
+import com.avos.avoscloud.GetCallback;
+import com.avos.avoscloud.LogUtil;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.clj.fastble.BleManager;
 import com.clj.fastble.callback.BleGattCallback;
@@ -32,12 +38,15 @@ import com.clj.fastble.callback.BleScanCallback;
 import com.clj.fastble.data.BleDevice;
 import com.clj.fastble.exception.BleException;
 import com.clj.fastble.scan.BleScanRuleConfig;
+import com.mb.smartfridge.MyApplication;
 import com.mb.smartfridge.R;
 import com.mb.smartfridge.adapter.DeviceAdapter;
 import com.mb.smartfridge.adapter.DrawerLayoutAdapter;
 import com.mb.smartfridge.entity.DrawerlayoutEntity;
+import com.mb.smartfridge.entity.VersionInfo;
 import com.mb.smartfridge.utils.CommonUtils;
 import com.mb.smartfridge.utils.DialogHelper;
+import com.mb.smartfridge.utils.JsonHelper;
 import com.mb.smartfridge.utils.NavigationHelper;
 import com.mb.smartfridge.utils.ProgressDialogHelper;
 import com.mb.smartfridge.utils.ToastHelper;
@@ -45,6 +54,7 @@ import com.mb.smartfridge.views.DividerItemDecoration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener {
     private static final int REQUEST_PERMISSION_ACCESS_LOCATION = 1;
@@ -78,6 +88,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         initView();
         initListener();
         initBlueManager();
+        checkVersion();
     }
 
     private void setTitle(String title) {
@@ -167,6 +178,55 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 }
             }
         });
+    }
+
+    private void checkVersion(){
+        AVQuery<AVObject> avQuery = new AVQuery<>("app_version");
+        avQuery.getInBackground("5b1f9dfca22b9d003a48a79e", new GetCallback<AVObject>() {
+            @Override
+            public void done(AVObject avObject, AVException e) {
+                Log.d("result",avObject.toString());
+                VersionInfo versionInfo = JsonHelper.fromJson(avObject.toString(), VersionInfo.class);
+                if (versionInfo!=null && versionInfo.getServerData()!=null){
+                    String code = CommonUtils.getVersionName(MyApplication.getAppContext());
+                    VersionInfo.ServerDataBean dataBean = versionInfo.getServerData();
+                    if (getVersion(code)<getVersion(dataBean.getVersion())){
+                        DialogHelper.showConfirmDialog(MainActivity.this, CommonUtils.isNotEmpty(dataBean.getTitle())?dataBean.getTitle():"版本更新", dataBean.getTips(), getVersion(dataBean.getForce_reboot())==0,
+                                R.string.dialog_positive, new DialogInterface.OnClickListener() {
+
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        openUrlWithBrowser("https://fir.im/akcg");
+                                    }
+
+                                }, R.string.dialog_negative, null);
+                    }
+                }
+            }
+        });
+    }
+
+    private int getVersion(String version){
+        try {
+            if (CommonUtils.isNotEmpty(version) && version.contains(".")){
+                version = version.replace(".","");
+            }
+            return Integer.parseInt(version);
+        }catch (Exception e){
+            return 0;
+        }
+    }
+
+    private void openUrlWithBrowser(String url){
+        try {
+            Intent intent = new Intent();
+            intent.setAction("android.intent.action.VIEW");
+            Uri content_url = Uri.parse(url);
+            intent.setData(content_url);
+            startActivity(intent);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**

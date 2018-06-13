@@ -340,52 +340,68 @@ public class SmartFridgeActivity extends BaseActivity implements View.OnClickLis
             if (!TextUtils.isEmpty(setTemp)){
                 int curTemp = getHexResult(setTemp);
                 curTemp = curTemp-1;
-                if (curTemp<-25){
-                    showToast("设置温度不能低于-25℃");
-                }else{
-                    if (curTemp<0){
-                        curTemp = curTemp+256;
+                if (getHexResult(tempUnit)==1){
+                    if (curTemp<-13){
+                        showToast("设置温度不能低于-13℉");
+                    }else{
+                        if (curTemp<0){
+                            curTemp = curTemp+256;
+                        }
+                        setTemp = Integer.toHexString(curTemp);
+                        setTemperature(setTemp);
                     }
-//                    tvCurrentTemp.setText(String.format("%1s%2s",String.valueOf(curTemp), getHexResult(tempUnit)==1?"℉":"℃"));
-                    setTemp = Integer.toHexString(curTemp);
-                    setTemperature(setTemp);
-
+                }else{
+                    if (curTemp<-25){
+                        showToast("设置温度不能低于-25℃");
+                    }else{
+                        if (curTemp<0){
+                            curTemp = curTemp+256;
+                        }
+                        setTemp = Integer.toHexString(curTemp);
+                        setTemperature(setTemp);
+                    }
                 }
             }
         }else if (id == R.id.iv_plus){
             if (!TextUtils.isEmpty(setTemp)){
                 int curTemp = getHexResult(setTemp);
                 curTemp = curTemp+1;
-                if (curTemp>20){
-                    showToast("设置温度不能高于20℃");
-                }else{
-                    if (curTemp<0){
-                        curTemp = curTemp+256;
+                if (getHexResult(tempUnit)==1){
+                    if (curTemp>68){
+                        showToast("设置温度不能高于68℉");
+                    }else{
+                        if (curTemp<0){
+                            curTemp = curTemp+256;
+                        }
+                        setTemp = Integer.toHexString(curTemp);
+                        setTemperature(setTemp);
                     }
-//                    tvCurrentTemp.setText(String.format("%1s%2s",String.valueOf(curTemp), getHexResult(tempUnit)==1?"℉":"℃"));
-                    setTemp = Integer.toHexString(curTemp);
-                    setTemperature(setTemp);
+                }else{
+                    if (curTemp>20){
+                        showToast("设置温度不能高于20℃");
+                    }else{
+                        if (curTemp<0){
+                            curTemp = curTemp+256;
+                        }
+                        setTemp = Integer.toHexString(curTemp);
+                        setTemperature(setTemp);
+                    }
                 }
             }
 
         }else if (id == R.id.iv_power){
             sendMessages(isOpen?powerOffOrder:powerOnOrder);
-//            ivPower.setImageResource(isOpen?R.mipmap.ic_power_off :R.mipmap.ic_power_on);
         }else if (id == R.id.lin_energy){
             int state = getHexResult(energyState);
             sendMessages(state==1?energyStrongOrder:energySaveOrder);
-//            setEnergyState(state==1?0:1);
         }else if (id == R.id.lin_battery){
             int state = getHexResult(batteryState);
             if (state == 0){
                 sendMessages(batteryMiddleOrder);
-//                setBatteryState(1);
             }else if (state == 1){
                 sendMessages(batteryHighOrder);
-//                setBatteryState(2);
             }else if (state == 2){
                 sendMessages(batteryLowerOrder);
-//                setBatteryState(0);
             }
         }else if (id == R.id.tv_tempC){
             if (getHexResult(tempUnit)==1){
