@@ -1,12 +1,14 @@
 package com.mb.smartfridge.activity;
 
-import android.os.Bundle;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
+        import android.os.AsyncTask;
+        import android.os.Bundle;
+        import android.support.annotation.WorkerThread;
+        import android.view.View;
+        import android.widget.ImageView;
+        import android.widget.TextView;
 
-import com.mb.smartfridge.R;
-import com.mb.smartfridge.utils.NavigationHelper;
+        import com.mb.smartfridge.R;
+        import com.mb.smartfridge.utils.NavigationHelper;
 
 /**
  * Created by cgy on 2018/4/19 0019.
@@ -51,6 +53,15 @@ public class AboutUsActivity extends BaseActivity implements View.OnClickListene
         }
     }
 
+
+    private class myTask extends AsyncTask<Void, Integer, Void>{
+
+        @WorkerThread
+        @Override
+        protected Void doInBackground(Void... voids) {
+            return null;
+        }
+    }
 
 
 }

@@ -30,7 +30,6 @@ import com.avos.avoscloud.AVObject;
 import com.avos.avoscloud.AVQuery;
 import com.avos.avoscloud.AVUser;
 import com.avos.avoscloud.GetCallback;
-import com.avos.avoscloud.LogUtil;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.clj.fastble.BleManager;
 import com.clj.fastble.callback.BleGattCallback;
@@ -54,7 +53,6 @@ import com.mb.smartfridge.views.DividerItemDecoration;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener {
     private static final int REQUEST_PERMISSION_ACCESS_LOCATION = 1;
@@ -196,7 +194,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        openUrlWithBrowser("https://fir.im/akcg");
+                                        openUrlWithBrowser("http://www.chinatawa.com/app/app-download.html");
                                     }
 
                                 }, R.string.dialog_negative, null);
