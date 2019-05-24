@@ -15,7 +15,7 @@ import com.mb.smartfridge.utils.Utils;
 
 /**
  * 起始页
- *
+ * 还原
  * @author @author chenqm on 2018/1/15.
  */
 
