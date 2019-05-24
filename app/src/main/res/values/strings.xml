@@ -26,4 +26,6 @@
     <string name="aboutus">关于我们</string>
     <string name="dialog_positive">确 定</string>
     <string name="dialog_negative">取 消</string>
+    <string name="logining">登录中...</string>
+    <string name="more_back_exit">再按一次返回退出</string>
 </resources>

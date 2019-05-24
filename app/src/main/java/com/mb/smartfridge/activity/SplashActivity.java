@@ -30,16 +30,17 @@ public class SplashActivity extends Activity{
             Utils.StatusBarIconManager.MIUI(this, Utils.StatusBarIconManager.TYPE.BLACK);
             Utils.StatusBarIconManager.Flyme(this, Utils.StatusBarIconManager.TYPE.BLACK);
         }
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (AVUser.getCurrentUser() != null) {
-                    NavigationHelper.startActivity(SplashActivity.this,MainActivity.class,null,true);
-                }else{
-                    NavigationHelper.startActivity(SplashActivity.this,LoginActivity.class,null,true);
-                }
-            }
-        }, 1500);
+        NavigationHelper.startActivity(SplashActivity.this,MainActivity.class,null,true);
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                if (AVUser.getCurrentUser() != null) {
+//                    NavigationHelper.startActivity(SplashActivity.this,MainActivity.class,null,true);
+//                }else{
+//                    NavigationHelper.startActivity(SplashActivity.this,LoginActivity.class,null,true);
+//                }
+//            }
+//        }, 1500);
     }
 
 

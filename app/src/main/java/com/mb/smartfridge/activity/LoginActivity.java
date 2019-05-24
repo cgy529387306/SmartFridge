@@ -24,7 +24,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        setTitle("登录");
+        setTitle(R.string.login);
         initView();
         initNext();
     }
@@ -82,7 +82,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             showToast(getString(R.string.password_error));
             return;
         }
-        ProgressDialogHelper.showProgressDialog(this,"登录中...");
+        ProgressDialogHelper.showProgressDialog(this,getString(R.string.logining));
         AVUser.loginByMobilePhoneNumberInBackground(mobile, password, new LogInCallback<AVUser>() {
             @Override
             public void done(AVUser avUser, AVException e) {
@@ -104,7 +104,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     @Override
     public void onBackPressed() {
         if (System.currentTimeMillis() - mLastClickTimeMills > DOUBLE_CLICK_INTERVAL) {
-            ToastHelper.showToast("再按一次返回退出");
+            ToastHelper.showToast(getString(R.string.more_back_exit));
             mLastClickTimeMills = System.currentTimeMillis();
             return;
         }

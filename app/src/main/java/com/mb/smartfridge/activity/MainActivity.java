@@ -73,8 +73,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private TextView tvAddDevice; //底部  添加设备
     private LinearLayout llyNoDevice; //  设备界面
     private List<DrawerlayoutEntity> list = new ArrayList<>();
-    private int img[] = new int[]{R.mipmap.ic_about,R.mipmap.ic_store,R.mipmap.ic_edit_password,R.mipmap.ic_logout};
-    private String[] text = new String[]{"关于我们","线上商城","修改密码","退出登录"};
+//    private int img[] = new int[]{R.mipmap.ic_about,R.mipmap.ic_store,R.mipmap.ic_edit_password,R.mipmap.ic_logout};
+//    private String[] text = new String[]{"关于我们","线上商城","修改密码","退出登录"};
+
+    private int img[] = new int[]{R.mipmap.ic_about};
+    private String[] text = new String[]{"关于我们"};
     private BluetoothAdapter bluetoothAdapter;
     private List<BleDevice> deviceList;
     @Override
@@ -108,8 +111,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     private void initView() {
-        tvName = findViewById(R.id.tv_name);
-        tvName.setText(AVUser.getCurrentUser().getUsername());
+//        tvName = findViewById(R.id.tv_name);
+//        tvName.setText(AVUser.getCurrentUser().getUsername());
 
         ivSearch = findViewById(R.id.iv_search);
         tvSearch = findViewById(R.id.tv_search);
